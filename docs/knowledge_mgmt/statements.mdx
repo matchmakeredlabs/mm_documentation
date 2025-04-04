@@ -1,0 +1,262 @@
+---
+title: /statements
+slug: /api/statements
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /statements
+
+This endpoint provides access to Palet™ statements that describe educational elements.
+
+
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [GET - Lookup By ID](#get---lookup-by-id) | Retrieve a Palet™ statement by its unique UUID. |
+| [GET - By Keywords](#get---by-keywords) | Search for Palet™ statements using keyword-based search. |
+
+## GET - Lookup By ID
+
+### Endpoint
+```
+https://matchmakeredlabs.net/api/statements/{statementId}
+```
+
+
+Retrieve a statement by its ID.
+
+---
+
+### Request
+
+#### Request Parameters
+| Parameter    | Type   | Required | Description                          |
+|-------------|--------|----------|--------------------------------------|
+| `statementId` | string | Yes      | UUID of the statement to retrieve (e.g., "2001-4830-9328-ff20"). |
+
+#### Sample Requests
+
+<Tabs
+  groupId="get_statement_by_id"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+
+```bash
+curl \
+-H "Authorization: Bearer <your_token>" \
+-H "Content-Type: application/json" \
+-X GET "https://matchmakeredlabs.net/api/statements/2001-4830-9328-ff20"
+```
+
+</TabItem>
+
+<TabItem value="js">
+
+```javascript
+async function getStatementById(statementId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/statements/${statementId}`, {
+      method: "GET",
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer <your_token>`
+      },
+    });
+    return response.json();
+}
+
+getStatementById("2001-4830-9328-ff20")
+    .then((data) => console.log(data));
+```
+
+</TabItem>
+
+<TabItem value="python">
+
+```python
+import requests
+
+token = "<your_token>"
+statement_id = "2001-4830-9328-ff20"
+url = f"https://matchmakeredlabs.net/api/statements/{statement_id}"
+headers = {
+  'Content-Type': 'application/json',
+  'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+### Response
+
+#### Response Parameters
+
+| Parameter   | Type   | Description                                    |
+|------------|--------|------------------------------------------------|
+| `getid`      | string | ID for intermediary statement.                 |
+| `statements` | array  | An array of statements (most likely of length 1) with the given statement ID        |
+| `id`         | string | ID for intermediary statement.                 |
+| `stmtType`   | string | Type of the intermediary statement. (`STFk`, `CU`, `P`)             |
+| `statement`  | string | The intermediary statement.                    |
+| `kb`         | string | Knowledge base name (subject).                 |
+| `kbid`       | number | Knowledge base ID.                             |
+
+---
+
+#### Example Response
+
+```json
+{
+  "getid": "2001-4830-9328-ff20",
+  "statements": [
+    {
+      "id": "2001-4830-9328-ff20",
+      "stmtType": "STFk",
+      "statement": "Phase diagrams are graphic expressions of the relationship between pressure and temperature showing the conditions under which a substance will be in a particular state.",
+      "kb": "Sci",
+      "kbid": 1
+    }
+  ]
+}
+```
+
+## GET - By Keywords
+
+### Endpoint
+
+```
+https://matchmakeredlabs.net/api/statements?keywords={keywords}
+```
+
+
+Retrieve a statement by keywords.
+
+---
+
+### Request
+
+#### Request Parameters
+| Parameter | Type   | Required | Description                                     |
+|-----------|--------|----------|-------------------------------------------------|
+| `keywords`  | string | Yes      | URI-encoded string of keywords for search (max 5 results returned).     |
+
+#### Sample Requests
+
+<Tabs
+  groupId="search_statement_by_keyword"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+
+```bash
+curl \
+-H "Authorization: Bearer <your_token>" \
+-H "Content-Type: application/json" \
+-X GET "https://matchmakeredlabs.net/api/statements?keywords=water%20cycle"
+```
+
+</TabItem>
+
+<TabItem value="js">
+
+```javascript
+async function getStatementByKeyword(keywords) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/statements?keywords=${encodeURIComponent(keywords)}`, {
+      method: "GET",
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer <your_token>`
+      },
+    });
+    return response.json();
+}
+
+getStatementByKeyword("water cycle")
+    .then((data) => console.log(data));
+```
+
+</TabItem>
+
+<TabItem value="python">
+
+```python
+import requests
+from urllib.parse import quote
+
+token = "<your_token>"
+keywords = "water cycle"
+url = f'https://matchmakeredlabs.net/api/statements?keywords={quote(keywords)}'
+headers = {
+  'Content-Type': 'application/json',
+  'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+### Response
+
+#### Response Parameters
+
+| Parameter  | Type   | Description                                     |
+|------------|--------|-------------------------------------------------|
+| `keywords`   | string | The search keywords used.                      |
+| `statements` | array  | An array of matching statements (max 5 results).    |
+| `id`         | string | ID for intermediary statement.                 |
+| `stmtType`   | string | Type of the intermediary statement. (`STFk`, `CU`, `P`)            |
+| `statement`  | string | The intermediary statement.                    |
+| `kb`         | string | Knowledge base name (subject).                 |
+| `kbid`       | number | Knowledge base ID.                             |
+
+#### Example Response
+
+
+```json
+{
+  "keywords": "hypothesis",
+  "statements": [
+    {
+      "id": "5130-4830-9328-ab12",
+      "stmtType": "CU",
+      "statement": "In a direct proof, the hypothesis of a conjecture is assumed true, and the conclusion is then shown to be true.",
+      "kb": "Math",
+      "kbid": 2
+    },
+    {
+      "id": "5902-4830-9328-cd34",
+      "stmtType": "STFk",
+      "statement": "Writing true-and-false conditional statements about geometric concepts and relationships in if (hypothesis)-then (conclusion) form.",
+      "kb": "Math",
+      "kbid": 2
+    }
+  ]
+}
+```
+
