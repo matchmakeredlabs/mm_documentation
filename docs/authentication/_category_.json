@@ -1,8 +1,0 @@
-{
-  "label": "Authentication",
-  "position": 2,
-  "link": {
-    "type": "generated-index",
-    "description": "Authenticate your username to get a token to interact with the MatchMaker API"
-  }
-}
