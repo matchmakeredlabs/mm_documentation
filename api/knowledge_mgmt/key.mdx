@@ -1,0 +1,194 @@
+---
+title: /key
+slug: /key
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /key
+
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [GET - Decompose an Element Key into Component Descriptors](#get---decompose-an-element-key-into-component-descriptors) | Decompose an element Palet™ key into Component Descriptors. | 
+
+## GET - Decompose an Element Key into Component Descriptors
+
+### Endpoint
+```
+https://matchmakeredlabs.net/api/key/{key}
+```
+
+Decompose an element Palet™ key into Component Descriptors.
+
+---
+
+### Request
+
+#### Request Parameters
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `key`     | string | Yes      | An element key made up of multiple intermediary statement keys. Example: `5001C-5073C-6200C-4955P-5247P-5358P-6350P-6736P-13396P`. |
+
+#### Sample Requests
+
+<Tabs
+  groupId="get_decompose_element_key"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+
+```bash
+TOKEN="st=Core&un=<username>&x=21234602T21560217Z&m=0qhd9jkTaIqbT_V5xTUmQ4HJhMpd3h5AAB9p9AnceUCs"
+
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/key/{paletKey}"
+```
+
+</TabItem>
+
+<TabItem value="js">
+
+```js
+let TOKEN = "YOUR_API_TOKEN"
+
+async function getDescriptor(url = "") {
+    // Default options are marked with *
+    const response = await fetch(url, {
+      method: "GET", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${TOKEN}`
+      },
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
+  
+  getDescriptor("https://matchmakeredlabs.net/api/key/{paletKey}")
+       .then((data) => {
+            console.log(data); // JSON data parsed by `data.json()` call
+       });
+```
+
+</TabItem>
+
+<TabItem value="python">
+
+```python
+import requests
+token="st=Core&un=<username>&x=21234602T21560217Z&m=0qhd9jkTaIqbT_V5xTUmQ4HJhMpd3h5
+AAB9p9AnceUCs"
+
+url = 'https://matchmakeredlabs.net/api/key/{paletKey}'
+headers = {
+  'Content-Type': 'application/x-www-form-urlencoded',
+  'Authorization': "Bearer " + token
+}
+
+req = requests.get(url, headers=headers)
+print(req.text)
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+### Response
+
+#### Response Parameters
+
+| Parameter     | Type   | Description |
+|--------------|--------|-------------|
+| `key`        | string | The element key consisting of multiple intermediary statement IDs. (`5001C-5073C-6200C-4955P-5247P-5358P-6350P-6736P-13396P`)|
+| `statements` | array  | An array of statements with details on intermediary statements. |
+| `id`       | string | The ID of the intermediary statement. |
+| `rel`      | string | The relationship between the intermediary statement and the educational element. (`Central`, `Peripheral`) |
+| `int`      | string | Intentionality between intermediary statement and the educational element. (`Intentional`, `Inferred`) |
+| `stmtType` | string | The type of intermediary statement. (`STFk`, `CU`, `P`) |
+| `statement`| string | The textual description of the intermediary statement. |
+
+---
+
+#### Example Response
+
+<details>
+<summary>Example Response</summary>
+
+```json
+{
+  "key": "5001C-5073C-6200C-4955P-5247P-5358P-6350P-6736P-13396P",
+  "statements": [
+    {
+      "id": "5001",
+      "rel": "Central",
+      "int": "Intentional",
+      "stmtType": "STFk",
+      "statement": "Transforming functions among various representations: words, algebraic formulas, graphs, and input-output tables."
+    },
+    {
+      "id": "5073",
+      "rel": "Central",
+      "int": "Intentional",
+      "stmtType": "P",
+      "statement": "Exploring rates of change."
+    },
+    {
+      "id": "6200",
+      "rel": "Central",
+      "int": "Intentional",
+      "stmtType": "CU",
+      "statement": "A linear function has a constant rate of change."
+    }
+    {
+      "id": "5247",
+      "rel": "Peripheral",
+      "int": "Intentional",
+      "stmtType": "STFk",
+      "statement": "Computers and graphing calculators can be used to graph linear functions."
+    },
+    {
+      "id": "5358",
+      "rel": "Peripheral",
+      "int": "Intentional",
+      "stmtType": "P",
+      "statement": "Relating slope and graphs of linear equations to real-life problems involving a rate of change."
+    },
+    {
+      "id": "6350",
+      "rel": "Peripheral",
+      "int": "Intentional",
+      "stmtType": "CU",
+      "statement": "Slope represents a constant rate of change."
+    },
+    {
+      "id": "6736",
+      "rel": "Peripheral",
+      "int": "Intentional",
+      "stmtType": "STFk",
+      "statement": "Finding rates of change in real-life and problem situations."
+    },
+    {
+      "id": "13396",
+      "rel": "Peripheral",
+      "int": "Intentional",
+      "stmtType": "STFk",
+      "statement": "Identifying examples of increasing or decreasing rates of change"
+    }
+
+  ]
+}
+```
+
+</details>

@@ -4,62 +4,64 @@
 // There are various equivalent ways to declare your Docusaurus config.
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
-import {themes as prismThemes} from 'prism-react-renderer';
+import { themes as prismThemes } from "prism-react-renderer";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'MatchMaker Documentation',
-  tagline: 'Liberate Learning!',
-  favicon: 'img/favicon.ico',
+  title: "MatchMaker Documentation",
+  tagline: "Liberate Learning!",
+  favicon: "img/favicon.ico",
 
   // Set the production url of your site here
-  url: 'https://matchmakeredlabs.github.io',
+  url: "https://matchmakeredlabs.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/mm_documentation/',
+  baseUrl: "/mm_documentation/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'matchmakeredlabs', // Usually your GitHub org/user name.
-  projectName: 'mm_documentation', // Usually your repo name.
+  organizationName: "matchmakeredlabs", // Usually your GitHub org/user name.
+  projectName: "mm_documentation", // Usually your repo name.
 
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "warn",
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
-  
+
   presets: [
     [
-      'classic',
+      "@docusaurus/preset-classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: './sidebars.js',
-        },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
+          sidebarPath: "./usage_sidebar.js",
+          // id: "usage",
+          path: "usage",
+          routeBasePath: "usage",
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       }),
+    ],
+  ],
+  plugins: [
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "api",
+        path: "api",
+        routeBasePath: "api",
+        sidebarPath: "./api_sidebar.js",
+      },
     ],
   ],
 
@@ -67,35 +69,59 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
+      image: "img/docusaurus-social-card.jpg",
       navbar: {
-        title: 'MatchMaker',
+        title: "MatchMaker",
         logo: {
-          alt: 'MatchMaker Logo',
-          src: 'img/logo.svg',
+          alt: "MatchMaker Logo",
+          src: "img/logo.svg",
         },
         items: [
           {
-            type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
-            position: 'left',
-            label: 'Tutorial',
+            to: "https://matchmakeredlabs.net/",
+            label: "Home",
+            position: "left",
+            target: "_self",
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
-         
-
+          {
+            type: "doc",
+            position: "left",
+            docId: "starting/intro",
+            label: "Usage Docs",
+          },
+          {
+            position: "left",
+            to: "/api/intro",
+            label: "API Docs",
+          },
         ],
-        
       },
       footer: {
-        style: 'dark',
+        style: "dark",
         links: [
           {
-            title: 'About Us',
+            title: "MatchMaker",
             items: [
               {
-                label: 'Our Team',
-                to: 'https://matchmakeredlabs.net/About/team.html',
+                label: "Home",
+                href: "https://matchmakeredlabs.net",
+              },
+              {
+                label: "Our Team",
+                href: "https://matchmakeredlabs.net/About/team.html",
+              },
+            ],
+          },
+          {
+            title: "Docs",
+            items: [
+              {
+                label: "Usage",
+                to: "/docs/usage/intro",
+              },
+              {
+                label: "API",
+                to: "/docs/api/intro",
               },
             ],
           },
@@ -108,7 +134,5 @@ const config = {
       },
     }),
 };
-
-
 
 export default config;

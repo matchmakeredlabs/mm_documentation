@@ -1,0 +1,624 @@
+---
+title: /groups
+slug: /groups
+---
+    
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /groups
+
+This endpoint provides access to group management operations including creating, reading, updating, and deleting groups.
+
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [GET - All Users](#get---all-users) | Retrieve all users or the caller's own user record based on permissions. |
+| [GET - User by ID](#get---user-by-id) | Retrieve a specific user by their ID. |
+
+## GET - All Users 
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/users
+```
+
+**Notes:**
+- Returns all users if caller has admin `ReadUser` privilege
+- Otherwise, returns only the caller's own user record
+- Password hashes are never returned
+- Response includes computed properties for groups and roles
+
+---
+
+### Request
+
+#### Query Parameters
+
+None required.
+
+#### Sample Request
+
+<Tabs
+  groupId="get_all_users"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/users"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getUsers() {
+    const response = await fetch("https://matchmakeredlabs.net/api/users", {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getUsers().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/users'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | User identifier |
+| `type` | string | Always "user" |
+| `name` | string | Username/email |
+| `fullName` | string | Display name |
+| `_groups` | array | Groups the user belongs to |
+| `_roles` | array | Roles in different organizations |
+
+#### Example Response
+```json
+[
+    {
+        "id": "user123",
+        "type": "user",
+        "name": "john.doe@example.com",
+        "fullName": "John Doe",
+        "_groups": [
+            "org1:group1",
+            "org2:group2"
+        ],
+        "_roles": [
+            {
+                "orgId": "org1",
+                "role": "owner"
+            },
+            {
+                "orgId": "org2",
+                "role": "editor"
+            }
+        ]
+    },
+    {
+        "id": "user456",
+        "type": "user",
+        "name": "jane.smith@example.com",
+        "fullName": "Jane Smith",
+        "_groups": [],
+        "_roles": [
+            {
+                "orgId": "org1",
+                "role": "reader"
+            }
+        ]
+    }
+]
+```
+
+## GET - User by ID
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/users/{userId}
+```
+
+**Notes:**
+- Returns user if caller has admin `ReadUser` privilege
+- Users can always retrieve their own record
+- Password hashes are never returned
+- Response includes computed properties for groups and roles
+
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `userId` | string | Yes | User identifier |
+
+#### Sample Request
+
+<Tabs
+  groupId="get_user_by_id"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/users/user123"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getUser(userId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/users/${userId}`, {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getUser("user123").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+user_id = "user123"
+url = f'https://matchmakeredlabs.net/api/users/{user_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | User identifier |
+| `type` | string | Always "user" |
+| `name` | string | Username/email |
+| `fullName` | string | Display name |
+| `_groups` | array | Groups the user belongs to |
+| `_roles` | array | Roles in different organizations |
+
+#### Example Response
+```json
+{
+    "id": "user123",
+    "type": "user",
+    "name": "john.doe@example.com",
+    "fullName": "John Doe",
+    "_groups": [
+        "org1:group1",
+        "org2:group2"
+    ],
+    "_roles": [
+        {
+            "orgId": "org1",
+            "role": "owner"
+        },
+        {
+            "orgId": "org2",
+            "role": "editor"
+        }
+    ]
+}
+```
+
+## POST - Create Group
+
+### Endpoint
+```
+POST https://matchmakeredlabs.net/api/groups
+```
+
+**Notes:**
+- Requires `WriteGroup` permission on the specified organization
+- Group ID will be automatically generated as `{org}:{name}`
+- Organization must exist
+- Members must be either users or groups (organizations cannot be members)
+- All specified members must exist
+
+---
+
+### Request
+
+#### Request Body
+```json
+{
+    "name": "developers",
+    "org": "org1",
+    "description": "Development team",
+    "members": [
+        "user123",
+        "user456"
+    ]
+}
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Group name (will be combined with org for ID) |
+| `org` | string | Yes | Organization ID that will own this group |
+| `description` | string | No | Group description |
+| `members` | array | Yes | Array of user/group IDs |
+
+#### Sample Request
+
+<Tabs
+  groupId="create_group"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"name":"developers","org":"org1","description":"Development team","members":["user123","user456"]}' \
+-X POST "https://matchmakeredlabs.net/api/groups"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function createGroup() {
+    const response = await fetch("https://matchmakeredlabs.net/api/groups", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            name: "developers",
+            org: "org1",
+            description: "Development team",
+            members: ["user123", "user456"]
+        })
+    });
+    return response.json();
+}
+
+createGroup().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/groups'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    "name": "developers",
+    "org": "org1",
+    "description": "Development team",
+    "members": ["user123", "user456"]
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Group identifier (format: `{org}:{name}`) |
+| `type` | string | Always "group" |
+| `name` | string | Group name |
+| `org` | string | Organization ID that owns this group |
+| `description` | string | Group description |
+| `members` | array | Array of user/group IDs |
+| `_groups` | array | Groups this group belongs to |
+| `_roles` | array | Roles in different organizations |
+
+#### Example Response
+```json
+{
+    "id": "org1:developers",
+    "type": "group",
+    "name": "developers",
+    "org": "org1",
+    "description": "Development team",
+    "members": [
+        "user123",
+        "user456"
+    ],
+    "_groups": [],
+    "_roles": []
+}
+```
+
+## PUT - Update Group
+
+### Endpoint
+```
+PUT https://matchmakeredlabs.net/api/groups/{groupId}
+```
+
+**Notes:**
+- Requires `WriteGroup` permission on the group's organization
+- Cannot change the organization owner
+- All specified members must exist
+- Members must be either users or groups (organizations cannot be members)
+
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `groupId` | string | Yes | Group identifier (format: `{org}:{name}`) |
+
+#### Request Body
+```json
+{
+    "name": "developers",
+    "org": "org1",
+    "description": "Updated development team",
+    "members": [
+        "user123",
+        "user456",
+        "user789"
+    ]
+}
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Group name (must match existing name) |
+| `org` | string | Yes | Organization ID (must match existing org) |
+| `description` | string | No | Group description |
+| `members` | array | Yes | Array of user/group IDs |
+
+#### Sample Request
+
+<Tabs
+  groupId="update_group"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"name":"developers","org":"org1","description":"Updated development team","members":["user123","user456","user789"]}' \
+-X PUT "https://matchmakeredlabs.net/api/groups/org1:developers"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function updateGroup(groupId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/groups/${groupId}`, {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            name: "developers",
+            org: "org1",
+            description: "Updated development team",
+            members: ["user123", "user456", "user789"]
+        })
+    });
+    return response.json();
+}
+
+updateGroup("org1:developers").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+group_id = "org1:developers"
+url = f'https://matchmakeredlabs.net/api/groups/{group_id}'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    "name": "developers",
+    "org": "org1",
+    "description": "Updated development team",
+    "members": ["user123", "user456", "user789"]
+}
+
+response = requests.put(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Group identifier (format: `{org}:{name}`) |
+| `type` | string | Always "group" |
+| `name` | string | Group name |
+| `org` | string | Organization ID that owns this group |
+| `description` | string | Group description |
+| `members` | array | Array of user/group IDs |
+| `_groups` | array | Groups this group belongs to |
+| `_roles` | array | Roles in different organizations |
+
+#### Example Response
+```json
+{
+    "id": "org1:developers",
+    "type": "group",
+    "name": "developers",
+    "org": "org1",
+    "description": "Updated development team",
+    "members": [
+        "user123",
+        "user456",
+        "user789"
+    ],
+    "_groups": [],
+    "_roles": []
+}
+```
+
+## DELETE - Remove Group
+
+### Endpoint
+```
+DELETE https://matchmakeredlabs.net/api/groups/{groupId}
+```
+
+**Notes:**
+- Requires `WriteGroup` permission on the group's organization
+- Group will be removed from any other groups it belongs to
+- Group will be removed from any organization roles
+- This action cannot be undone
+
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `groupId` | string | Yes | Group identifier (format: `{org}:{name}`) |
+
+#### Sample Request
+
+<Tabs
+  groupId="delete_group"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X DELETE "https://matchmakeredlabs.net/api/groups/org1:developers"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function deleteGroup(groupId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/groups/${groupId}`, {
+        method: "DELETE",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.status === 204;
+}
+
+deleteGroup("org1:developers").then(success => console.log(success));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+group_id = "org1:developers"
+url = f'https://matchmakeredlabs.net/api/groups/{group_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.delete(url, headers=headers)
+print(response.status_code == 204)
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+A successful deletion returns HTTP status code `204 No Content` with no response body.

@@ -1,0 +1,642 @@
+---
+title: /organizations
+slug: /organizations
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /organizations
+
+This endpoint provides access to organization management operations including creating, reading, updating, and deleting organizations.
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [GET - All Organizations](#get---all-organizations) | Retrieve all organizations the user has permission to access. |
+| [GET - Organization by ID](#get---organization-by-id) | Retrieve a specific organization by its ID. |
+| [POST - Create Organization](#post---create-organization) | Create a new organization with specified members and roles. |
+| [PUT - Update Organization](#put---update-organization) | Update an existing organization's details or members. |
+| [DELETE - Remove Organization](#delete---remove-organization) | Delete an organization and its associated data. |
+
+
+## GET - All Organizations
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/orgs
+```
+
+Retrieve all organizations that the authenticated user has permission to access.
+
+**Note**
+- Results are filtered based on user permissions
+- Only organizations where the user has at least `ReadOrg` privilege are returned
+- Results include computed properties (`_canWriteGroups`, `_canWriteDescriptors`) based on user's permissions
+
+---
+
+### Request
+
+#### Query Parameters
+
+None required.
+
+#### Sample Request
+
+<Tabs
+  groupId="get_all_organizations"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/orgs"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getOrganizations() {
+    const response = await fetch("https://matchmakeredlabs.net/api/orgs", {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getOrganizations().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/orgs'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Array of | organization | Array of organization objects |
+
+#### Example Response
+```json
+[
+    {
+        "id": "orgName123",
+        "type": "org",
+        "name": "Sample Organization",
+        "description": "Organization description",
+        "members": [
+            {
+                "id": "user123",
+                "role": "owner"
+            }
+        ],
+        "_canWriteGroups": true,
+        "_canWriteDescriptors": true
+    },
+    {
+        "id": "anotherOrg",
+        "type": "org",
+        "name": "Another Organization",
+        "description": "Another description",
+        "members": [
+            {
+                "id": "user456",
+                "role": "editor"
+            }
+        ],
+        "_canWriteGroups": false,
+        "_canWriteDescriptors": false
+    }
+]
+```
+
+---
+
+## GET - Organization by ID
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/orgs/{orgId}
+```
+
+Retrieve a specific organization by ID.
+
+**Note**
+- User must have `ReadOrg` privilege on the specific organization
+- Returns 404 if organization doesn't exist or user lacks permission to view it
+- Response includes computed properties (`_canWriteGroups`, `_canWriteDescriptors`) based on user's permissions
+
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `orgId` | string | Yes | Organization identifier |
+
+#### Sample Request
+
+<Tabs
+  groupId="get_organization_by_id"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/orgs/orgName123"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getOrganization(orgId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/orgs/${orgId}`, {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getOrganization("orgName123").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+org_id = "orgName123"
+url = f'https://matchmakeredlabs.net/api/orgs/{org_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Organization identifier |
+| `type` | string | Always "org" |
+| `name` | string | Organization name |
+| `description` | string | Organization description |
+| `members` | array | Array of member objects |
+| `_canWriteGroups` | boolean | Whether user can modify groups |
+| `_canWriteDescriptors` | boolean | Whether user can modify descriptors |
+
+#### Example Response
+```json
+{
+    "id": "orgName123",
+    "type": "org",
+    "name": "Sample Organization",
+    "description": "Organization description",
+    "members": [
+        {
+            "id": "user123",
+            "role": "owner"
+        }
+    ],
+    "_canWriteGroups": true,
+    "_canWriteDescriptors": true
+}
+```
+
+## POST - Create Organization
+
+### Endpoint
+```
+POST https://matchmakeredlabs.net/api/orgs
+```
+
+**Notes:**
+- Creating organizations requires admin privileges with `WriteOrg` permission
+- Organization names must be unique
+- Members must be either users or groups (organizations cannot be members)
+- At least one member must be assigned the 'owner' role
+
+---
+
+### Request
+
+#### Request Body
+```json
+{
+    "name": "orgName",
+    "description": "Organization description",
+    "members": [
+        {
+            "id": "userId",
+            "role": "owner"
+        }
+    ]
+}
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Organization name (must match regex pattern) |
+| `description` | string | No | Organization description |
+| `members` | array | Yes | Array of member objects |
+| `members[].id` | string | Yes | User or group ID |
+| `members[].role` | string | Yes | Role (owner, editor, or reader) |
+
+#### Valid Roles
+| Role | Permissions |
+|------|------------|
+| `owner` | All permissions (full access) |
+| `editor` | Can read/write descriptors, read users, read groups, read organizations |
+| `reader` | Can read descriptors only |
+
+#### Sample Request
+
+<Tabs
+  groupId="create_organization"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"name":"newOrg","description":"New org description","members":[{"id":"user123","role":"owner"}]}' \
+-X POST "https://matchmakeredlabs.net/api/orgs"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function createOrganization() {
+    const response = await fetch("https://matchmakeredlabs.net/api/orgs", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            name: "newOrg",
+            description: "New org description",
+            members: [{
+                id: "user123",
+                role: "owner"
+            }]
+        })
+    });
+    return response.json();
+}
+
+createOrganization().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/orgs'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    "name": "newOrg",
+    "description": "New org description",
+    "members": [{
+        "id": "user123",
+        "role": "owner"
+    }]
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | The created organization's ID |
+| `type` | string | Always "org" |
+| `name` | string | Organization name |
+| `description` | string | Organization description |
+| `members` | array | Array of member objects |
+| `_canWriteGroups` | boolean | Whether user can modify groups |
+| `_canWriteDescriptors` | boolean | Whether user can modify descriptors |
+
+#### Example Response
+```json
+{
+    "id": "newOrg",
+    "type": "org",
+    "name": "newOrg",
+    "description": "New org description",
+    "members": [
+        {
+            "id": "user123",
+            "role": "owner"
+        }
+    ],
+    "_canWriteGroups": true,
+    "_canWriteDescriptors": true
+}
+```
+
+## PUT - Update Organization
+
+### Endpoint
+```
+PUT https://matchmakeredlabs.net/api/orgs/{orgId}
+```
+
+**Notes:**
+- Requires `WriteOrg` permission on the specific organization
+- Cannot remove all owners from an organization
+- Members must be either users or groups (organizations cannot be members)
+- Organization name cannot be changed
+
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `orgId` | string | Yes | Organization identifier |
+
+#### Request Body
+```json
+{
+    "name": "existingOrgName",
+    "description": "Updated organization description",
+    "members": [
+        {
+            "id": "userId",
+            "role": "owner"
+        },
+        {
+            "id": "groupId",
+            "role": "editor"
+        }
+    ]
+}
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | Organization name (must match existing name) |
+| `description` | string | No | Organization description |
+| `members` | array | Yes | Array of member objects |
+| `members[].id` | string | Yes | User or group ID |
+| `members[].role` | string | Yes | Role (owner, editor, or reader) |
+
+#### Valid Roles
+| Role | Permissions |
+|------|------------|
+| `owner` | All permissions (full access) |
+| `editor` | Can read/write descriptors, read users, read groups, read organizations |
+| `reader` | Can read descriptors only |
+
+#### Sample Request
+
+<Tabs
+  groupId="update_organization"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"name":"existingOrgName","description":"Updated description","members":[{"id":"user123","role":"owner"}]}' \
+-X PUT "https://matchmakeredlabs.net/api/orgs/existingOrgName"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function updateOrganization(orgId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/orgs/${orgId}`, {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            name: "existingOrgName",
+            description: "Updated description",
+            members: [{
+                id: "user123",
+                role: "owner"
+            }]
+        })
+    });
+    return response.json();
+}
+
+updateOrganization("existingOrgName").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+org_id = "existingOrgName"
+url = f'https://matchmakeredlabs.net/api/orgs/{org_id}'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    "name": "existingOrgName",
+    "description": "Updated description",
+    "members": [{
+        "id": "user123",
+        "role": "owner"
+    }]
+}
+
+response = requests.put(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Organization identifier |
+| `type` | string | Always "org" |
+| `name` | string | Organization name |
+| `description` | string | Organization description |
+| `members` | array | Array of member objects |
+| `_canWriteGroups` | boolean | Whether user can modify groups |
+| `_canWriteDescriptors` | boolean | Whether user can modify descriptors |
+
+#### Example Response
+```json
+{
+    "id": "existingOrgName",
+    "type": "org",
+    "name": "existingOrgName",
+    "description": "Updated description",
+    "members": [
+        {
+            "id": "user123",
+            "role": "owner"
+        }
+    ],
+    "_canWriteGroups": true,
+    "_canWriteDescriptors": true
+}
+```
+
+## DELETE - Remove Organization
+
+### Endpoint
+```
+DELETE https://matchmakeredlabs.net/api/orgs/{orgId}
+```
+
+**Notes:**
+- Requires `WriteOrg` permission on the specific organization
+- Deleting an organization will also remove all its group memberships
+- This action cannot be undone
+
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `orgId` | string | Yes | Organization identifier |
+
+#### Sample Request
+
+<Tabs
+  groupId="delete_organization"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X DELETE "https://matchmakeredlabs.net/api/orgs/orgToDelete"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function deleteOrganization(orgId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/orgs/${orgId}`, {
+        method: "DELETE",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.status === 204;
+}
+
+deleteOrganization("orgToDelete").then(success => console.log(success));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+org_id = "orgToDelete"
+url = f'https://matchmakeredlabs.net/api/orgs/{org_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.delete(url, headers=headers)
+print(response.status_code == 204)
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+A successful deletion returns HTTP status code `204 No Content` with no response body.

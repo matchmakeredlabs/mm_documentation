@@ -1,0 +1,189 @@
+---
+title: /report/mxn
+slug: /report/mxn
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /report/mxn
+
+Generate a match report between source and destination descriptors using a specified match profile.
+
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [POST - Generate Match Report](#post---generate-match-report) | Generate a match report between two sets of descriptors |
+
+## POST - Generate Match Report
+
+### Endpoint
+```
+POST https://matchmakeredlabs.net/api/report/mxn
+```
+
+**Notes:**
+- Requires authentication
+- Both source and destination descriptor lists must have at least one item
+- Only descriptors that are public or where user has `ReadDescriptor` permission will be included
+- Match scores are calculated using the Advanced Match Algorithm
+- Match scores range from 0-100, with scores of 0 being excluded from results
+
+---
+
+### Request
+
+#### Request Body
+```json
+{
+    "profile": {
+        // Match profile configuration
+    },
+    "srcDescriptorIds": [
+        "descriptor1",
+        "descriptor2"
+    ],
+    "dstDescriptorIds": [
+        "descriptor3",
+        "descriptor4"
+    ]
+}
+```
+
+#### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `profile` | object | Yes | Match profile configuration |
+| `srcDescriptorIds` | array | Yes | List of source descriptor IDs to match from |
+| `dstDescriptorIds` | array | Yes | List of destination descriptor IDs to match against |
+
+#### Sample Request
+
+<Tabs
+  groupId="generate_match_report"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"profile":{},"srcDescriptorIds":["descriptor1","descriptor2"],"dstDescriptorIds":["descriptor3","descriptor4"]}' \
+-X POST "https://matchmakeredlabs.net/api/report/mxn"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function generateMatchReport() {
+    const response = await fetch("https://matchmakeredlabs.net/api/report/mxn", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            profile: {},
+            srcDescriptorIds: ["descriptor1", "descriptor2"],
+            dstDescriptorIds: ["descriptor3", "descriptor4"]
+        })
+    });
+    return response.json();
+}
+
+generateMatchReport().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/report/mxn'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    "profile": {},
+    "srcDescriptorIds": ["descriptor1", "descriptor2"],
+    "dstDescriptorIds": ["descriptor3", "descriptor4"]
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+The response includes:
+- Match profile used
+- Array of source items, each containing:
+  - Original descriptor properties
+  - Array of matching destination descriptors with match scores
+
+#### Example Response
+```json
+{
+    "profile": {
+        // Match profile configuration used
+    },
+    "result": [
+        {
+            "item": {
+                "id": "descriptor1",
+                "name": "Source Descriptor 1",
+                // ... other descriptor properties
+            },
+            "matches": [
+                {
+                    "id": "descriptor3",
+                    "name": "Destination Descriptor 3",
+                    "matchIndex": 85,
+                    // ... other descriptor properties
+                },
+                {
+                    "id": "descriptor4",
+                    "name": "Destination Descriptor 4",
+                    "matchIndex": 72,
+                    // ... other descriptor properties
+                }
+            ]
+        },
+        {
+            "item": {
+                "id": "descriptor2",
+                "name": "Source Descriptor 2",
+                // ... other descriptor properties
+            },
+            "matches": [
+                {
+                    "id": "descriptor3",
+                    "name": "Destination Descriptor 3",
+                    "matchIndex": 63,
+                    // ... other descriptor properties
+                }
+            ]
+        }
+    ]
+}
+```
+
+#### Notes about the Response
+- Only matches with scores > 0 are included in the results
+- `matchIndex` is an integer from 1-100 representing the match score
+- Descriptor properties include standard fields like id, name, etc.
+- Each source descriptor includes all its matching destination descriptors above the threshold
