@@ -18,7 +18,7 @@ This endpoint provides access to user management operations including creating, 
 | [GET - User by ID](#get-user-by-id) | Retrieve a specific user by their ID. |
 | [POST - Create User](#post---create-user) | Create a new user with specified details and password. |
 | [PUT - Update User](#put---update-user) | Update an existing user's information or password. |
-| [DELETE - Remove User](#delete---remove-user) | Delete a user and remove them from all groups and organizations. |
+| [DELETE](#delete---remove-user) | Delete a user and remove them from all groups and organizations. |
 
 ## GET - All Users
 
@@ -28,7 +28,7 @@ GET https://matchmakeredlabs.net/api/users
 ```
 
 **Notes:**
-- Returns all users if caller has admin `ReadUser` privilege
+- Returns all users if caller has system-wide admin `ReadUser` privilege
 - Otherwise, returns only the caller's own user record
 - Password hashes are never returned
 - Response includes computed properties for groups and roles
@@ -153,8 +153,7 @@ GET https://matchmakeredlabs.net/api/users/{userId}
 ```
 
 **Notes:**
-- Returns user if caller has admin `ReadUser` privilege
-- Users can always retrieve their own record
+- Users can only retrieve their own record, with the exception of system-wide admin
 - Password hashes are never returned
 - Response includes computed properties for groups and roles
 
@@ -265,7 +264,7 @@ POST https://matchmakeredlabs.net/api/users
 ```
 
 **Notes:**
-- Requires admin privilege with `WriteUser` permission
+- Can only be done by users with the `owner` role in any organization
 - Password is required for new users
 - Username/email must not contain leading or trailing whitespace
 - Username/email must match pattern: alphanumeric characters, dots, underscores, percent, plus, or hyphen, optionally followed by @ and domain
@@ -390,8 +389,7 @@ PUT https://matchmakeredlabs.net/api/users/{userId}
 ```
 
 **Notes:**
-- Users can update their own record
-- Admin with `WriteUser` privilege can update any user
+- Users can only update their own record
 - Password is optional during update
 - Username/email must match pattern if being changed
 - Existing group memberships and roles are preserved unless explicitly modified
@@ -530,8 +528,7 @@ DELETE https://matchmakeredlabs.net/api/users/{userId}
 ```
 
 **Notes:**
-- Requires admin privilege with `WriteUser` permission
-- User will be removed from all groups and organizations
+- Users can only delete themselves, or be deleted by system-wide administrator.
 - This action cannot be undone
 
 ---
