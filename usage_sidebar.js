@@ -37,7 +37,7 @@ const sidebars = {
     },
     {
       type: "category",
-      label: "MatchMaker Example Workflows",
+      label: "Example Workflows",
       collapsible: true,
       collapsed: true,
       link: {
@@ -54,7 +54,7 @@ const sidebars = {
     },
     {
       type: "category",
-      label: "MatchMaker Vocabulary",
+      label: "Functionality and Vocabulary",
       collapsible: true,
       collapsed: true,
       link: {
