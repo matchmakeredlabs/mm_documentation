@@ -35,7 +35,7 @@ const config = {
     defaultLocale: "en",
     locales: ["en"],
   },
-
+  scripts: ["scripts/auth.js"],
   presets: [
     [
       "@docusaurus/preset-classic",
@@ -75,10 +75,13 @@ const config = {
         logo: {
           alt: "MatchMaker Logo",
           src: "img/logo.svg",
+          href: "https://matchmakeredlabs.net",
+          target: "_self",
         },
+
         items: [
           {
-            to: "https://matchmakeredlabs.net/",
+            to: "/",
             label: "Home",
             position: "left",
             target: "_self",
@@ -87,12 +90,16 @@ const config = {
             type: "doc",
             position: "left",
             docId: "starting/intro",
-            label: "Usage Docs",
+            label: "User Docs",
           },
           {
             position: "left",
             to: "/api/intro",
             label: "API Docs",
+          },
+          {
+            type: "search",
+            position: "right",
           },
         ],
       },
@@ -116,12 +123,16 @@ const config = {
             title: "Docs",
             items: [
               {
+                label: "Home",
+                href: "/",
+              },
+              {
                 label: "Usage",
-                to: "/docs/usage/intro",
+                to: "/usage/starting/intro",
               },
               {
                 label: "API",
-                to: "/docs/api/intro",
+                to: "/api/intro",
               },
             ],
           },
