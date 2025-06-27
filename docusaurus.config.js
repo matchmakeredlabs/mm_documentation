@@ -86,12 +86,12 @@ const config = {
             position: "left",
             target: "_self",
           },
-          {
-            type: "doc",
-            position: "left",
-            docId: "starting/intro",
-            label: "User Docs",
-          },
+          // {
+          //   type: "doc",
+          //   position: "left",
+          //   docId: "starting/intro",
+          //   label: "User Docs",
+          // },
           {
             position: "left",
             to: "/api/intro",
@@ -126,10 +126,10 @@ const config = {
                 label: "Home",
                 href: "/",
               },
-              {
-                label: "Usage",
-                to: "/usage/starting/intro",
-              },
+              // {
+              //   label: "Usage",
+              //   to: "/usage/starting/intro",
+              // },
               {
                 label: "API",
                 to: "/api/intro",
