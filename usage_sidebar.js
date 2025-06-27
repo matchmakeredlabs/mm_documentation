@@ -33,6 +33,65 @@ const sidebars = {
           id: "starting/intro",
           label: "Introduction",
         },
+        {
+          type: "category",
+          label: "How to Describe a Collection?",
+          collapsible: true,
+          collapsed: true,
+          link: {
+            type: "doc",
+            id: "starting/describe/intro",
+          },
+          items: [
+            {
+              type: "doc",
+              id: "starting/describe/intro",
+              label: "Introduction",
+            },
+            {
+              type: "doc",
+              id: "starting/describe/hierarchy",
+              label: "How to Build a Hierarchy?",
+            },
+            {
+              type: "doc",
+              id: "starting/describe/describe",
+              label: "How to Describe Elements?",
+            },
+            {
+              type: "doc",
+              id: "starting/describe/exporting",
+              label: "How to Export a Collection?",
+            },
+          ],
+        },
+        {
+          type: "category",
+          label: "Generating a Report",
+          collapsible: true,
+          collapsed: true,
+          link: {
+            type: "doc",
+            id: "starting/report/intro",
+          },
+          items: [
+            {
+              type: "doc",
+              id: "starting/report/custom_sets",
+              label: "How to Make Custom Sets?",
+            },
+            {
+              type: "doc",
+              id: "starting/report/matching",
+              label: "Matching!",
+            },
+          ],
+        },
+        {
+          type: "doc",
+          label: "How to Manage an Organization?",
+          id: "starting/manage/intro",
+        },
       ],
     },
     {
