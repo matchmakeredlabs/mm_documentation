@@ -35,7 +35,7 @@ const sidebars = {
         },
         {
           type: "category",
-          label: "How to Describe a Collection?",
+          label: "Building Described Collections",
           collapsible: true,
           collapsed: true,
           link: {
@@ -45,13 +45,8 @@ const sidebars = {
           items: [
             {
               type: "doc",
-              id: "starting/describe/intro",
-              label: "Introduction",
-            },
-            {
-              type: "doc",
               id: "starting/describe/hierarchy",
-              label: "How to Build a Hierarchy?",
+              label: "How to Create a Collection?",
             },
             {
               type: "doc",

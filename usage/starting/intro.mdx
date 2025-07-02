@@ -1,27 +1,44 @@
-import CollectionIntro from '/static/img/collection_intro.png'
 import ElementsIntro from '/static/img/elements_in_tutorial.png'
 import PaletIntro from '/static/img/palet_intro.png'
-import MatchExample from '/static/img/shmingus_match_example.png'
+import MatchExample from '/static/img/shmingus_quadratic_mathhelp.png'
+import LoginPage from '/static/img/login_page.png'
+import MMDash from '/static/img/mm_dash.png'
 
 # Welcome to MatchMaker
 Thank you for joining MatchMaker on our mission to liberate learning! We're excited to introduce you to our platform and quickly get you up to speed!
 ## What is MatchMaker?
 MatchMaker is revolutionary new technology enabling meaningful and reliable matches between learning assets, competency-based frameworks, and curriculums. MatchMaker has uses in higher education, hiring, personal skill growth, and much more! With MatchMaker, gone are days of wasting time relearning or sitting with uncertainty in knowledge!
-## Let's Begin!
-After you complete this ["Getting Started"](/usage/starting/intro) training, you may want to find gaps in your knowledge of MatchMaker. This may end up saving you loads of time digging through the thorough ["Functionality and Vocabulary"](/usage/vocab/intro) section you see on the left. Therefore, as a malevolent documentation writer, I'm going to use MatchMaker to make this process easy.
-### Collections
-MatchMaker's power is enabled by a novel and intuitive architecture for storing learning assets, competency-based frameworks, and curriculums. This architecture generalizes all of these items into what are known as __collections__. So, let's take this documentation and turn it into a collection! 
-{/* <img src={CollectionIntro} width="50%" alt="The Collection format enables matching across a wide variety of other collections"/>
-
-But what makes these collections so special? Let's zoom in! */}
-<img src={ElementsIntro} width="50%" alt="Inside each collection sits elements which are made up of two colors which mix to create the collection's color"/>
-Here we can see this entire documentation organized into one large collection. Collections consist of elements, which are organized in a hierarchy. At the moment, I've only placed in one element, this particular page, which I've neatly organized under a "Getting Started" section. We can see this page has a particular color within the said collection: green. Notice, when we look closer, that this green is actually made up of a mix of blue and yellow. We can think of the overall color, green, representing exactly what it is that this introduction section teaches, but for example, we can split it up into two pieces: the basic causes of Matchmaker (blue), and an introduction to collections (yellow), which together make green. This is where the real magic of MatchMaker lies, as each element in any collection must be made of different components from what is called the Palet<sup style={{fontSize: 8}}>TM</sup>: the Palet can be thought of as a massive array of little pieces of learning material, which combined make up a full element's description of knowledge.
-### What is the Palet<sup style={{fontSize: 8}}>TM</sup>?
-The Palet<sup style={{fontSize: 8}}>TM</sup> is a MatchMaker maintained database of little bits of knowledge you can use to describe any piece of learning material. The Pallet<sup style={{fontSize: 8}}>TM</sup> enables all the innovations of MatchMaker, and is the backbone of all matches between items. Each tiny piece of knowledge in the Palet<sup style={{fontSize: 8}}>TM</sup> is referred to as a Palet<sup style={{fontSize: 8}}>TM</sup> statement, and an elements unique combination of Palet<sup style={{fontSize: 8}}>TM</sup> statements is called a Palet<sup style={{fontSize: 8}}>TM</sup> key. To help you remember, you can think of the Palet<sup style={{fontSize: 8}}>TM</sup> as the many different colors you can choose from to paint your elements, a Palet statement as a particular color, and a Palet<sup style={{fontSize: 8}}>TM</sup> key as a particular art piece you make from your choice of colors. 
-<img src={PaletIntro} width="50%" alt="Metaphors for the terms are described visually: The Palet as an artists Palette, A Palet Statement as a particular color, and a Palet Key as a variety of colors"/>
-## Collections in Action!
-Enough explanation, let's see what these collections can do! 
 ### John Shmingus: A Struggling Student
-Introducing John Shmingus: a 9th grader who is struggling with solving quadratic equations in Algebra 1, and wants to find some resources for help. John performs a wide variety of google searches but is unsure if he's learning the right things. Eventually, he discovers MatchMaker, and looks to it to run a search. He chooses to see what items in the Algebra 1 curriculum, a collection on MatchMaker, line up with MathPlanet's educational resources on the topic, another collection on MatchMaker. Running the match, this is what he gets!
-<img src={MatchExample} width="50%" alt="A page breaking down Algebra 1's curriculum into a hierarchy is shown, one item is selected: 'B. Solving Quadratic Equations by Graphing - This is lesson 10b of Algebra 1'. On the other side, matches with this item are shown from the educational resource, MathPlanet, ranked by their MatchIndex"/>
-John sees the high MatchIndex, which represents how closely the two topics line up, between the curriculum's information and MathPlanet's resources, and chooses to go there to learn about quadratic equations. Furthermore, John then looks carefully at the Palet Key of both topics to ensure he can fill in the gaps MathPlanet may be missing.  
+Introducing John Shmingus: a 9th grader who is struggling with solving quadratic equations in Algebra 1, and wants to find some resources for help. Shmingus decides to ask their teacher for where to go, who refers them to MathHelp.org, a MatchMaker enabled website. Drawing from MatchMaker's description of the standard Algebra 1 curriculum at Shmingus's school, the page refers Shmingus to a variety of highly applicable resources for quadratic equations. 
+<div style={{textAlign: "center"}}>
+<img  src={MatchExample} width="50%" alt="A page with one item on the left: 'Solving Quadratic Equations'. On the other side, matches with this item are shown from the educational resources on the site, ranked by their Match percentage"/>
+</div>
+Shmingus learns using the pages referred to using MatchMaker technology, and with the high match percentage, can be certain they've fully covered the topic. Shmingus returns to class confident in their abilities in quadratic equations.
+
+---
+
+## How does MatchMaker work? 
+After you complete this ["Getting Started"](/usage/starting/intro) training, you may want to find gaps in your knowledge of MatchMaker. This may end up saving you loads of time digging through the thorough ["Functionality and Vocabulary"](/usage/vocab/intro) section you see on the left. Therefore, let's apply MatchMaker to make this process easy!
+### The Power of Collections
+MatchMaker's power is enabled by a novel and intuitive architecture for storing learning assets, competency-based frameworks, and curriculums. This architecture generalizes all of these items into what are known as __collections__. So, let's take this documentation and turn it into a collection! 
+<div style={{textAlign: "center"}}>
+<img src={ElementsIntro} width="43%" alt="Inside each collection sits elements which are made up of two colors which mix to create the collection's color"/>
+</div>
+Here we can see this documentation organized into a collection. Collections consist of elements, which are organized in a hierarchy. At the moment, there is only one element: "Introduction", organized under the "Getting Started" section. Notice that "Introduction" has a particular color within the collection: green. In color theory, it is always possible to create a color out of a sum of others. In MatchMaker, we apply this principle to knowledge. Therefore, upon looking closer, we can see this green is actually made up of a mix of blue and yellow. In essence, we can think of the overall color, green, representing exactly what it is that this introduction section teaches, but the green has been split it up into two pieces which combine to fully represent the whole. This is where the real magic of MatchMaker lies, as each element in any collection must be made of different components from what is called the Palet<sup style={{fontSize: 8}}>TM</sup>.
+### What is the Palet?
+The Palet<sup style={{fontSize: 8}}>TM</sup> is a MatchMaker maintained database of little bits of knowledge you can use to describe any piece of learning material. The Palet enables many of the innovations of MatchMaker, and is the backbone of all matches between items. Each tiny piece of knowledge in the Palet is referred to as a Palet statement, and an element's unique combination of Palet statements is called a Palet key. To help you remember, you can think of the Palet as the many different colors you can choose from to paint your elements, a Palet statement as a particular color, and a Palet key as a particular art piece you make from your choice of colors. 
+<div style={{textAlign: "center"}}>
+<img src={PaletIntro} width="50%" alt="Metaphors for the terms are described visually: The Palet as an artists Palette, A Palet Statement as a particular color, and a Palet Key as a variety of colors"/>
+</div>
+
+---
+
+## What's next?
+Now you're up to speed with the basics of MatchMaker, we will now explore the MatchMaker UI! With your credentials given to you by your organization or by Matchmaker, navigate to MatchMaker's [login](uxstage.matchmakeredlabs.net), and we'll begin!
+<div style={{textAlign: "center"}}>
+<img src={LoginPage} width="40%" alt="MatchMaker's login page is visible, with the MatchMaker logo up top, and below a field for a username and password. There is a button which says login below"/>
+</div>
+Enter your username and password in the corresponding fields and press login! You should then be greeted with the MatchMaker dashboard and ready to learn the first piece of this tutorial: [Building Described Collections](/usage/starting/describe/intro).
+<div style={{textAlign: "center"}}>
+<img src={MMDash} width="100%" alt="MatchMaker's dashboard is shown. There are four differently colored buttons: Browse & Describe, Create, Generate Report, and Administer"/>
+</div>
