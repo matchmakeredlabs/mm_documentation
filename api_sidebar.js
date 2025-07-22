@@ -40,6 +40,7 @@ const sidebars = {
         "knowledge_mgmt/statements",
         "knowledge_mgmt/key",
         "knowledge_mgmt/collections",
+        "knowledge_mgmt/comments"
       ],
     },
     {

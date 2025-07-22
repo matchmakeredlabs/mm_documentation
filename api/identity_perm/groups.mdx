@@ -14,10 +14,129 @@ This endpoint provides access to group management operations including creating,
 
 | Endpoint | Description |
 |----------|-------------|
+| [GET - All Groups](#get---all-groups) | Retrieve all user groups |
 | [GET - Group by ID](#get---group-by-id) | Retrieve a specific group by its ID. |
 | [POST - Create Group](#post---create-group) | Create a new user group. |
 | [PUT - Update Group](#put---update-group) | Update a preexisting group by its ID. |
 | [DELETE](#delete---remove-group) | Delete a specific group by its ID. |
+
+## GET - All Groups
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/groups
+```
+
+**Notes:**
+- Returns all users if caller has system-wide admin `ReadGroup` privilege
+---
+
+### Request
+
+#### Query Parameters
+
+None required.
+
+#### Sample Request
+
+<Tabs
+  groupId="get_all_groups"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/groups"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getGroups() {
+    const response = await fetch("https://matchmakeredlabs.net/api/groups", {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getGroups().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/groups'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Group identifier (format: `{org}:{name}`) |
+| `type` | string | Always "group" |
+| `name` | string | Group name |
+| `org` | string | Organization ID that owns this group |
+| `description` | string | Group description |
+| `members` | array | Array of user/group IDs |
+| `_groups` | array | Groups this group belongs to |
+| `_roles` | array | Roles in different organizations |
+
+#### Example Response
+```json
+[
+    {
+        "id": "org1:developers",
+        "type": "group",
+        "name": "developers",
+        "org": "org1",
+        "description": "Development team",
+        "members": [
+            "user123",
+            "user456",
+            "user789"
+        ],
+        "_groups": [],
+        "_roles": []
+    },
+    {
+        "id": "org2:developers",
+        "type": "group",
+        "name": "developers",
+        "org": "org2",
+        "description": "Development team",
+        "members": [
+            "user321",
+            "user654",
+            "user987"
+        ],
+        "_groups": [],
+        "_roles": []
+    },
+]
+```
 
 ## GET - Group by ID
 
@@ -468,7 +587,7 @@ async function deleteGroup(groupId) {
             'Authorization': `Bearer ${TOKEN}`
         }
     });
-    return response.status === 204;
+    return response.status === 200;
 }
 
 deleteGroup("org1:developers").then(success => console.log(success));
@@ -487,11 +606,11 @@ headers = {
 }
 
 response = requests.delete(url, headers=headers)
-print(response.status_code == 204)
+print(response.status_code == 200)
 ```
 </TabItem>
 </Tabs>
 
 ### Response
 
-A successful deletion returns HTTP status code `204 No Content` with no response body.
+A successful deletion returns HTTP status code `200 No Content` with no response body.

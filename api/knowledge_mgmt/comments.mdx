@@ -1,0 +1,921 @@
+---
+title: /comments
+slug: /comments
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /comments
+
+This endpoint allows you to create, get, update, and delete comments on Palet statements.
+
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [GET - All Comments](#get---all-comments) | Retrieve all palet statement comments. |
+| [GET - Comment by ID](#get---comment-by-id) | Retrieve a specific comment by its ID. |
+| [POST - Create Comment](#post---create-comment) | Create a new comment. |
+| [PUT - Update Comment](#put---update-comment) | Update a preexisting comment by its ID. |
+| [DELETE](#delete---remove-comment) | Delete a specific comment by its ID. |
+
+## GET - All Comments
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/comments
+```
+
+**Notes:**
+- Returns all comments if caller has system-wide admin `ReadDescriptor` privilege (for now)
+---
+
+### Request
+
+#### Request Parameters
+
+None required.
+
+#### Sample Request
+
+<Tabs
+  groupId="get_all_comments"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/comments"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getComments() {
+    const response = await fetch("https://matchmakeredlabs.net/api/comments", {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getComments().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/comments'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | uuid | UUID for comment about specific Palet statement(s). |
+| `type` | string | Always "comment" |
+| `requestedAction` | string | One of add, delete, split, or merge. |
+| `comment` | string | The information provided in the comment |
+| `commentAbout` | string | Always paletStatements for now. |
+| `descriptor` | object | Array of user/group IDs. |
+| `statements` | array | Palet statements that this comment is abou.t |
+| `_orgId` | string | Organization of the collection that the descriptor is in. |
+| `descriptorId` | uuid | ID field of descriptor object. |
+| `statementIds` | array | String array of the ID fields of each object in the statements array. |
+| `userId` | string | User ID of the person who created the comment. |
+| `_canUpdate` | boolean | True if the user has permission to update the comment, false if not. |
+
+#### Example Response
+
+<details>
+<summary>Example Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "id": "4470ca36-a792-467f-8293-8072fbffdfbe",
+      "type": "comment",
+      "requestedAction": "add",
+      "comment": "Test add comment",
+      "commentAbout": "paletStatements",
+      "descriptor": {
+        "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+        "eleType": "lr",
+        "name": "test name",
+        "url": "urn:test",
+        "subject": "",
+        "description": "co",
+        "identifier": "",
+        "educationalLevel": "",
+        "creator": "",
+        "provenance": "",
+        "key": "https://palet.codes/key/5553C-10481C",
+        "mainEntity": "test",
+        "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+        "isPartOf": "testCollection",
+        "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+        "_leafCount": 1,
+        "_leafWithKeyCount": 1,
+        "_isLeaf": true,
+        "_public": false,
+        "_orgId": "testorg",
+        "datePublished": "",
+        "sdDatePublished": "",
+        "_canUpdate": true,
+        "leafCount": 1,
+        "leafWithKeyCount": 1
+      },
+      "statements": [
+        {
+          "id": "5553",
+          "rel": "Central",
+          "int": "Intentional",
+          "stmtType": "STFk",
+          "statement": "Palet Statement 1"
+        }
+      ],
+      "userId": "testuser",
+      "_orgId": "testorg",
+      "descriptorId": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+      "statementIds": [
+        "5553"
+      ],
+      "_canUpdate": true
+    },
+    {
+      "id": "4470ca36-a792-467f-8293-8072fbffdfbe",
+      "type": "comment",
+      "requestedAction": "delete",
+      "comment": "Test delete comment",
+      "commentAbout": "paletStatements",
+      "descriptor": {
+        "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+        "eleType": "lr",
+        "name": "test name",
+        "url": "urn:test",
+        "subject": "",
+        "description": "co",
+        "identifier": "",
+        "educationalLevel": "",
+        "creator": "",
+        "provenance": "",
+        "key": "https://palet.codes/key/5553C-10481C",
+        "mainEntity": "test",
+        "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+        "isPartOf": "testCollection",
+        "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+        "_leafCount": 1,
+        "_leafWithKeyCount": 1,
+        "_isLeaf": true,
+        "_public": false,
+        "_orgId": "testorg",
+        "datePublished": "",
+        "sdDatePublished": "",
+        "_canUpdate": true,
+        "leafCount": 1,
+        "leafWithKeyCount": 1
+      },
+      "statements": [
+        {
+          "id": "5553",
+          "rel": "Central",
+          "int": "Intentional",
+          "stmtType": "STFk",
+          "statement": "Palet Statement 1"
+        },
+        {
+          "id": "5554",
+          "rel": "Central",
+          "int": "Intentional",
+          "stmtType": "STFk",
+          "statement": "Palet Statement 2"
+        }
+      ],
+      "userId": "testuser",
+      "_orgId": "testorg",
+      "descriptorId": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+      "statementIds": [
+        "5553",
+        "5554"
+      ],
+      "_canUpdate": true
+    }
+  ]
+}
+```
+
+</details>
+
+## GET - Comment by ID
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/comments/{commentId}
+```
+
+### Notes
+- Returns a specific comment by UUID if caller has system-wide admin `ReadDescriptor` privilege (for now)
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter      | Type  | Required | Description                                     |
+|----------------|-------|----------|-------------------------------------------------|
+| `commentId` | uuid  | Yes      | UUID of a specific comment about a Palet statement.  |
+
+#### Sample Request
+
+<Tabs
+  groupId="get_comment_by_id"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/comments/comment123"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getComment(commentId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/comments/${commentId}`, {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getComment("comment123").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+comment_id = "comment123"
+url = f'https://matchmakeredlabs.net/api/comments/{comment_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+#### Response Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | uuid | UUID for comment about specific Palet statement(s). |
+| `type` | string | Always "comment" |
+| `requestedAction` | string | One of add, delete, split, or merge. |
+| `comment` | string | The information provided in the comment |
+| `commentAbout` | string | Always paletStatements for now. |
+| `descriptor` | object | Array of user/group IDs. |
+| `statements` | array | Palet statements that this comment is abou.t |
+| `_orgId` | string | Organization of the collection that the descriptor is in. |
+| `descriptorId` | uuid | ID field of descriptor object. |
+| `statementIds` | array | String array of the ID fields of each object in the statements array. |
+| `userId` | string | User ID of the person who created the comment. |
+| `_canUpdate` | boolean | True if the user has permission to update the comment, false if not. |
+
+#### Example Response
+
+```json
+{
+    "id": "comment123",
+    "type": "comment",
+    "requestedAction": "delete",
+    "comment": "Test delete comment",
+    "commentAbout": "paletStatements",
+    "descriptor": {
+      "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+      "eleType": "lr",
+      "name": "test name",
+      "url": "urn:test",
+      "subject": "",
+      "description": "co",
+      "identifier": "",
+      "educationalLevel": "",
+      "creator": "",
+      "provenance": "",
+      "key": "https://palet.codes/key/5553C-10481C",
+      "mainEntity": "test",
+      "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+      "isPartOf": "testCollection",
+      "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+      "_leafCount": 1,
+      "_leafWithKeyCount": 1,
+      "_isLeaf": true,
+      "_public": false,
+      "_orgId": "testorg",
+      "datePublished": "",
+      "sdDatePublished": "",
+      "_canUpdate": true,
+      "leafCount": 1,
+      "leafWithKeyCount": 1
+    },
+    "statements": [
+    {
+        "id": "5553",
+        "rel": "Central",
+        "int": "Intentional",
+        "stmtType": "STFk",
+        "statement": "Palet Statement 1"
+    },
+    {
+        "id": "5554",
+        "rel": "Central",
+        "int": "Intentional",
+        "stmtType": "STFk",
+        "statement": "Palet Statement 2"
+    }
+    ],
+    "userId": "testuser",
+    "_orgId": "testorg",
+    "descriptorId": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+    "statementIds": [
+    "5553",
+    "5554"
+    ],
+    "_canUpdate": true
+}
+```
+
+## POST - Create Comment
+
+### Endpoint
+```
+POST https://matchmakeredlabs.net/api/comments
+```
+
+**Notes:**
+- Can be done by anybody with `WriteDescriptor` privilege on a particular descriptor.
+---
+
+### Request
+
+#### Request Body
+```json
+{
+  "id": "Include this field if you want to be able to easily update a comment."
+  "comment": "This is a sample comment",
+  "commentAbout": "paletStatements",
+  "descriptor": {
+    "_canUpdate": true,
+    "_isLeaf": true,
+    "_leafCount": 1,
+    "_leafWithKeyCount": 1,
+    "_orgId": "testorg",
+    "_public": false,
+    "creator": "",
+    "datePublished": "",
+    "description": "co",
+    "educationalLevel": "",
+    "eleType": "lr",
+    "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+    "identifier": "",
+    "isPartOf": "testCollection",
+    "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+    "key": "https://palet.codes/key/5553C-10481C",
+    "leafCount": 1,
+    "leafWithKeyCount": 1,
+    "mainEntity": "test",
+    "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+    "name": "crazy",
+    "provenance": "",
+    "sdDatePublished": "",
+    "subject": "",
+    "url": "urn:test"
+  },
+  "statements": [
+    {
+      "id": "5553",
+      "int": "Intentional",
+      "rel": "Central",
+      "statement": "Defining the trigonometric ratios sine (sin), cosine (cos) and tangent (tan) in terms of the sides of a right triangle.",
+      "stmtType": "STFk"
+    }
+  ]
+}
+```
+
+#### Request Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | uuid/string | No | UUID/string ID for comment about specific Palet statement(s). |
+| `comment` | string | Yes | The information provided in the comment |
+| `commentAbout` | string | Yes | Always paletStatements (for now) |
+| `descriptor` | object | Yes | Descriptor relating to this comment |
+| `statements` | array | Yes | Palet statements that this comment is about |
+
+#### Sample Request
+
+<Tabs
+  groupId="create_comment"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{"commemt":"test",
+      "commentAbout":"paletStatements",
+      "descriptor": {
+        "_canUpdate": true,
+        "_isLeaf": true,
+        "_leafCount": 1,
+        "_leafWithKeyCount": 1,
+        "_orgId": "testorg",
+        "_public": false,
+        "creator": "",
+        "datePublished": "",
+        "description": "co",
+        "educationalLevel": "",
+        "eleType": "lr",
+        "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+        "identifier": "",
+        "isPartOf": "testCollection",
+        "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+        "key": "https://palet.codes/key/5553C-10481C",
+        "leafCount": 1,
+        "leafWithKeyCount": 1,
+        "mainEntity": "test",
+        "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+        "name": "crazy",
+        "provenance": "",
+        "sdDatePublished": "",
+        "subject": "",
+        "url": "urn:test"
+      },
+      "statements": {
+        "id": "5553",
+        "int": "Intentional",
+        "rel": "Central",
+        "statement": "Defining the trigonometric ratios sine (sin), cosine (cos) and tangent (tan) in terms of the sides of a right triangle.",
+        "stmtType": "STFk"
+      }}' \
+-X POST "https://matchmakeredlabs.net/api/comments"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function createComment() {
+    const response = await fetch("https://matchmakeredlabs.net/api/comments", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            comment: "test",
+            commentAbout: "paletStatements",
+            descriptor: {
+              _canUpdate: true,
+              _isLeaf: true,
+              _leafCount: 1,
+              _leafWithKeyCount: 1,
+              _orgId: "testorg",
+              _public: false,
+              creator: "",
+              datePublished: "",
+              description: "co",
+              educationalLevel: "",
+              eleType: "lr",
+              id: "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+              identifier: "",
+              isPartOf: "testCollection",
+              isPartOfId: "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+              key: "https://palet.codes/key/5553C-10481C",
+              leafCount: 1,
+              leafWithKeyCount: 1,
+              mainEntity: "test",
+              mainEntityId: "5a0ecf28-9ba2-42aa-8dea-273572987614",
+              name: "crazy",
+              provenance: "",
+              sdDatePublished: "",
+              subject: "",
+              url: "urn:test"
+            },
+            statements: {
+              id: "5553",
+              int: "Intentional",
+              rel: "Central",
+              statement: "Defining the trigonometric ratios sine (sin), cosine (cos) and tangent (tan) in terms of the sides of a right triangle.",
+              stmtType: "STFk"
+            }
+        })
+    });
+    return response.json();
+}
+
+createComment().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/comments'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    "comment": "test",
+    "commentAbout": "paletStatements",
+    "descriptor": {
+      "_canUpdate": true,
+      "_isLeaf": true,
+      "_leafCount": 1,
+      "_leafWithKeyCount": 1,
+      "_orgId": "testorg",
+      "_public": false,
+      "creator": "",
+      "datePublished": "",
+      "description": "co",
+      "educationalLevel": "",
+      "eleType": "lr",
+      "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+      "identifier": "",
+      "isPartOf": "testCollection",
+      "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+      "key": "https://palet.codes/key/5553C-10481C",
+      "leafCount": 1,
+      "leafWithKeyCount": 1,
+      "mainEntity": "test",
+      "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+      "name": "crazy",
+      "provenance": "",
+      "sdDatePublished": "",
+      "subject": "",
+      "url": "urn:test"
+    },
+    "statements": {
+      "id": "5553",
+      "int": "Intentional",
+      "rel": "Central",
+      "statement": "Defining the trigonometric ratios sine (sin), cosine (cos) and tangent (tan) in terms of the sides of a right triangle.",
+      "stmtType": "STFk"
+    }
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | uuid | UUID for comment about specific Palet statement(s). |
+
+#### Example Response
+
+```json
+{
+  "id": "5cb99bf1-8344-46de-b14d-0a798fbf26fa"
+}
+```
+
+## PUT - Update Comment
+
+### Endpoint
+```
+PUT https://matchmakeredlabs.net/api/comments/{commentId}
+```
+
+### Notes
+- Allowed to update a specific comment by UUID if caller has system-wide admin `ReadDescriptor` privilege (for now)
+---
+
+#### Request Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | uuid/string | Yes | UUID/string ID for existing comment about specific Palet statement(s). |
+| `comment` | string | Yes | The information provided in the comment |
+| `commentAbout` | string | Yes | Always paletStatements (for now) |
+| `descriptor` | object | Yes | Array of user/group IDs |
+| `statements` | array | Yes | Palet statements that this comment is about |
+
+#### Sample Request
+
+<Tabs
+  groupId="update_comment"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{
+      "id":"5cb99bf1-8344-46de-b14d-0a798fbf26fa"
+      "commemt":"test",
+      "commentAbout":"paletStatements",
+      "descriptor": {
+        "_canUpdate": true,
+        "_isLeaf": true,
+        "_leafCount": 1,
+        "_leafWithKeyCount": 1,
+        "_orgId": "testorg",
+        "_public": false,
+        "creator": "",
+        "datePublished": "",
+        "description": "co",
+        "educationalLevel": "",
+        "eleType": "lr",
+        "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+        "identifier": "",
+        "isPartOf": "testCollection",
+        "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+        "key": "https://palet.codes/key/5553C-10481C",
+        "leafCount": 1,
+        "leafWithKeyCount": 1,
+        "mainEntity": "test",
+        "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+        "name": "crazy",
+        "provenance": "",
+        "sdDatePublished": "",
+        "subject": "",
+        "url": "urn:test"
+      },
+      "statements": {
+        "id": "5553",
+        "int": "Intentional",
+        "rel": "Central",
+        "statement": "Defining the trigonometric ratios sine (sin), cosine (cos) and tangent (tan) in terms of the sides of a right triangle.",
+        "stmtType": "STFk"
+      }}' \
+-X PUT "https://matchmakeredlabs.net/api/comments/5cb99bf1-8344-46de-b14d-0a798fbf26fa"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function updateComment(commentId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/comments/${commentId}`, {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            id: commentId,
+            comment: "test",
+            commentAbout: "paletStatements",
+            descriptor: {
+              _canUpdate: true,
+              _isLeaf: true,
+              _leafCount: 1,
+              _leafWithKeyCount: 1,
+              _orgId: "testorg",
+              _public: false,
+              creator: "",
+              datePublished: "",
+              description: "co",
+              educationalLevel: "",
+              eleType: "lr",
+              id: "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+              identifier: "",
+              isPartOf: "testCollection",
+              isPartOfId: "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+              key: "https://palet.codes/key/5553C-10481C",
+              leafCount: 1,
+              leafWithKeyCount: 1,
+              mainEntity: "test",
+              mainEntityId: "5a0ecf28-9ba2-42aa-8dea-273572987614",
+              name: "crazy",
+              provenance: "",
+              sdDatePublished: "",
+              subject: "",
+              url: "urn:test"
+            },
+            statements: {
+              id: "5553",
+              int: "Intentional",
+              rel: "Central",
+              statement: "Defining the trigonometric ratios sine (sin), cosine (cos) and tangent (tan) in terms of the sides of a right triangle.",
+              stmtType: "STFk"
+            }
+        })
+    });
+    return response.json();
+}
+
+updateComment("comment123").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+comment_id = "comment_123"
+url = f'https://matchmakeredlabs.net/api/comments/{comment_id}'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    "id": "5cb99bf1-8344-46de-b14d-0a798fbf26fa",
+    "comment": "test",
+    "commentAbout": "paletStatements",
+    "descriptor": {
+      "_canUpdate": true,
+      "_isLeaf": true,
+      "_leafCount": 1,
+      "_leafWithKeyCount": 1,
+      "_orgId": "testorg",
+      "_public": false,
+      "creator": "",
+      "datePublished": "",
+      "description": "co",
+      "educationalLevel": "",
+      "eleType": "lr",
+      "id": "7beda6ef-4568-421d-bba3-3db5ea94eaad",
+      "identifier": "",
+      "isPartOf": "testCollection",
+      "isPartOfId": "52093ec2-3308-4fd6-be5b-bc4ad32a1cf0",
+      "key": "https://palet.codes/key/5553C-10481C",
+      "leafCount": 1,
+      "leafWithKeyCount": 1,
+      "mainEntity": "test",
+      "mainEntityId": "5a0ecf28-9ba2-42aa-8dea-273572987614",
+      "name": "crazy",
+      "provenance": "",
+      "sdDatePublished": "",
+      "subject": "",
+      "url": "urn:test"
+    },
+    "statements": {
+      "id": "5553",
+      "int": "Intentional",
+      "rel": "Central",
+      "statement": "Defining the trigonometric ratios sine (sin), cosine (cos) and tangent (tan) in terms of the sides of a right triangle.",
+      "stmtType": "STFk"
+    }
+}
+
+response = requests.put(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | uuid | UUID for comment about specific Palet statement(s). |
+
+#### Example Response
+
+```json
+{
+  "id": "5cb99bf1-8344-46de-b14d-0a798fbf26fa"
+}
+```
+
+## DELETE - Remove Comment
+
+### Endpoint
+```
+DELETE https://matchmakeredlabs.net/api/comments/{commentId}
+```
+
+### Notes
+- Allowed to update a specific comment by UUID if caller has system-wide admin `ReadDescriptor` privilege (for now)
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter      | Type  | Required | Description                                     |
+|----------------|-------|----------|-------------------------------------------------|
+| `commentId` | uuid  | Yes      | UUID of a specific comment about a Palet statement.  |
+
+#### Sample Request
+
+<Tabs
+  groupId="delete_comment"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X DELETE "https://matchmakeredlabs.net/api/comments/comment123"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function deleteComment(commentId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+deleteComment("comment123").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+comment_id = "comment123"
+url = f'https://matchmakeredlabs.net/api/comments/{comment_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | uuid | UUID for comment about specific Palet statement(s). |
+
+#### Example Response
+
+```json
+{
+  "id": "5cb99bf1-8344-46de-b14d-0a798fbf26fa"
+}
+```
