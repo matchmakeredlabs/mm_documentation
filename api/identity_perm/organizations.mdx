@@ -374,28 +374,11 @@ print(response.json())
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `id` | string | The created organization's ID |
-| `type` | string | Always "org" |
-| `name` | string | Organization name |
-| `description` | string | Organization description |
-| `members` | array | Array of member objects |
-| `_canWriteGroups` | boolean | Whether user can modify groups |
-| `_canWriteDescriptors` | boolean | Whether user can modify descriptors |
 
 #### Example Response
 ```json
 {
-    "id": "newOrg",
-    "type": "org",
-    "name": "newOrg",
-    "description": "New org description",
-    "members": [
-        {
-            "id": "user123",
-            "role": "owner"
-        }
-    ],
-    "_canWriteGroups": true,
-    "_canWriteDescriptors": true
+    "id": "newOrg"
 }
 ```
 
@@ -537,28 +520,11 @@ print(response.json())
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `id` | string | Organization identifier |
-| `type` | string | Always "org" |
-| `name` | string | Organization name |
-| `description` | string | Organization description |
-| `members` | array | Array of member objects |
-| `_canWriteGroups` | boolean | Whether user can modify groups |
-| `_canWriteDescriptors` | boolean | Whether user can modify descriptors |
 
 #### Example Response
 ```json
 {
-    "id": "existingOrgName",
-    "type": "org",
-    "name": "existingOrgName",
-    "description": "Updated description",
-    "members": [
-        {
-            "id": "user123",
-            "role": "owner"
-        }
-    ],
-    "_canWriteGroups": true,
-    "_canWriteDescriptors": true
+    "id": "existingOrgName"
 }
 ```
 
@@ -613,7 +579,7 @@ async function deleteOrganization(orgId) {
             'Authorization': `Bearer ${TOKEN}`
         }
     });
-    return response.status === 204;
+    return response.json();
 }
 
 deleteOrganization("orgToDelete").then(success => console.log(success));
@@ -632,11 +598,22 @@ headers = {
 }
 
 response = requests.delete(url, headers=headers)
-print(response.status_code == 204)
+print(response.json())
 ```
 </TabItem>
 </Tabs>
 
 ### Response
 
-A successful deletion returns HTTP status code `204 No Content` with no response body.
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Organization identifier |
+
+#### Example Response
+```json
+{
+    "id": "deletedOrgName"
+}
+```

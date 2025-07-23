@@ -14,8 +14,8 @@ This endpoint provides access to user management operations including creating, 
 
 | Endpoint | Description |
 |----------|-------------|
-| [GET - All Users](#get-all-users) | Retrieve all users or the caller's own user record based on permissions. |
-| [GET - User by ID](#get-user-by-id) | Retrieve a specific user by their ID. |
+| [GET - All Users](#get---all-users) | Retrieve all users or the caller's own user record based on permissions. |
+| [GET - User by ID](#get---user-by-id) | Retrieve a specific user by their ID. |
 | [POST - Create User](#post---create-user) | Create a new user with specified details and password. |
 | [PUT - Update User](#put---update-user) | Update an existing user's information or password. |
 | [DELETE](#delete---remove-user) | Delete a user and remove them from all groups and organizations. |
@@ -363,21 +363,11 @@ print(response.json())
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `id` | string | User identifier |
-| `type` | string | Always "user" |
-| `name` | string | Username/email |
-| `fullName` | string | Display name |
-| `_groups` | array | Groups the user belongs to (empty for new user) |
-| `_roles` | array | Roles in organizations (empty for new user) |
 
 #### Example Response
 ```json
 {
-    "id": "john.doe@example.com",
-    "type": "user",
-    "name": "john.doe@example.com",
-    "fullName": "John Doe",
-    "_groups": [],
-    "_roles": []
+    "id": "john.doe@example.com"
 }
 ```
 
@@ -495,28 +485,11 @@ print(response.json())
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `id` | string | User identifier |
-| `type` | string | Always "user" |
-| `name` | string | Username/email |
-| `fullName` | string | Display name |
-| `_groups` | array | Groups the user belongs to |
-| `_roles` | array | Roles in organizations |
 
 #### Example Response
 ```json
 {
-    "id": "john.doe@example.com",
-    "type": "user",
-    "name": "john.doe@example.com",
-    "fullName": "John Doe",
-    "_groups": [
-        "org1:group1"
-    ],
-    "_roles": [
-        {
-            "orgId": "org1",
-            "role": "editor"
-        }
-    ]
+    "id": "john.doe@example.com"
 }
 ```
 
@@ -570,7 +543,7 @@ async function deleteUser(userId) {
             'Authorization': `Bearer ${TOKEN}`
         }
     });
-    return response.status === 204;
+    return response.json();
 }
 
 deleteUser("john.doe@example.com").then(success => console.log(success));
@@ -589,11 +562,22 @@ headers = {
 }
 
 response = requests.delete(url, headers=headers)
-print(response.status_code == 204)
+print(response.json())
 ```
 </TabItem>
 </Tabs>
 
 ### Response
 
-A successful deletion returns HTTP status code `204 No Content` with no response body.
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | User identifier |
+
+#### Example Response
+```json
+{
+    "id": "john.doe@example.com"
+}
+```

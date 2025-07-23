@@ -362,28 +362,11 @@ print(response.json())
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `id` | string | Group identifier (format: `{org}:{name}`) |
-| `type` | string | Always "group" |
-| `name` | string | Group name |
-| `org` | string | Organization ID that owns this group |
-| `description` | string | Group description |
-| `members` | array | Array of user/group IDs |
-| `_groups` | array | Groups this group belongs to |
-| `_roles` | array | Roles in different organizations |
 
 #### Example Response
 ```json
 {
-    "id": "org1:developers",
-    "type": "group",
-    "name": "developers",
-    "org": "org1",
-    "description": "Development team",
-    "members": [
-        "user123",
-        "user456"
-    ],
-    "_groups": [],
-    "_roles": []
+    "id": "org1:developers"
 }
 ```
 
@@ -509,29 +492,11 @@ print(response.json())
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `id` | string | Group identifier (format: `{org}:{name}`) |
-| `type` | string | Always "group" |
-| `name` | string | Group name |
-| `org` | string | Organization ID that owns this group |
-| `description` | string | Group description |
-| `members` | array | Array of user/group IDs |
-| `_groups` | array | Groups this group belongs to |
-| `_roles` | array | Roles in different organizations |
 
 #### Example Response
 ```json
 {
-    "id": "org1:developers",
-    "type": "group",
-    "name": "developers",
-    "org": "org1",
-    "description": "Updated development team",
-    "members": [
-        "user123",
-        "user456",
-        "user789"
-    ],
-    "_groups": [],
-    "_roles": []
+    "id": "org1:developers"
 }
 ```
 
@@ -587,7 +552,7 @@ async function deleteGroup(groupId) {
             'Authorization': `Bearer ${TOKEN}`
         }
     });
-    return response.status === 200;
+    return response.json()
 }
 
 deleteGroup("org1:developers").then(success => console.log(success));
@@ -606,11 +571,22 @@ headers = {
 }
 
 response = requests.delete(url, headers=headers)
-print(response.status_code == 200)
+print(response.json())
 ```
 </TabItem>
 </Tabs>
 
 ### Response
 
-A successful deletion returns HTTP status code `200 No Content` with no response body.
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Group identifier (format: `{org}:{name}`) |
+
+#### Example Response
+```json
+{
+    "id": "org1:developers"
+}
+```
