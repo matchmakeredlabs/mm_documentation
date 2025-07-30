@@ -1,0 +1,888 @@
+---
+title: /settings
+slug: /settings
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /settings
+
+This endpoint allows you to store user-specific information, which currently includes match profiles and custom sets.
+
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [GET - All Settings](#get---all-settings) | Retrieve all settings objects. |
+| [GET - Settings by ID](#get---settings-by-id) | Retrieve a specific comment by its ID. |
+| [POST - Create Settings](#post---create-settings) | Create a new settings object. |
+| [PUT - Update Settings Object](#put---update-comment) | Update a preexisting settings object by its ID. |
+| [DELETE](#delete---remove-settings) | Delete a specific settings object by its ID. |
+
+
+## GET - All Settings
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/settings
+```
+
+**Notes:**
+- Returns all settings objects if caller has system-wide admin `ReadDescriptor` privilege.
+- Otherwise, returns user's own settings object and all organization-specific settings objects for which the user has `ReadDescriptor` privileges.
+---
+
+### Request
+
+#### Request Parameters
+
+None required.
+
+#### Sample Request
+
+<Tabs
+  groupId="get_all_settings"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/settings"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getSettings() {
+    const response = await fetch("https://matchmakeredlabs.net/api/settings", {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getSettings().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/settings'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Always "settings_**mainEntityId**" |
+| `type` | string | Always "settings" |
+| `mainEntityId` | string | The user or organization ID that created the settings object. |
+| `matchProfiles` | object array | If it exists, all match profiles owned by the mainEntityId. |
+| `customSets` | object array | If it exists, all custom sets owned by the mainEntityId. |
+| `_canUpdate` | boolean | True if the user has permission to update the settings object, false if not. |
+| `_mainEntityType` | string | Always "user" or "org" |
+
+#### Example Response
+```json
+{
+  "id": "settings_user123",
+  "type": "settings",
+  "mainEntityId": "user123",
+  "matchProfiles": {
+    "testMatchProfile": {
+        "alg-w-cc": "2",
+        "alg-t-cc": "0",
+        "alg-w-cp": "0.49",
+        "alg-t-cp": "0",
+        "alg-w-pc": "0.5",
+        "alg-t-pc": "0",
+        "alg-w-pp": "0.86",
+        "alg-t-pp": "0.16",
+        "alg-w-k": "1",
+        "alg-t-k": "0.66",
+        "alg-w-c": "1",
+        "alg-t-c": "0",
+        "alg-w-p": "1",
+        "alg-t-p": "0",
+        "alg-w-d": "0.1",
+        "alg-t-d": "0"
+    }
+},
+  "customSets": {
+    "testCustomSet": {
+      "descriptors": [
+        {
+          "eleType": "cs",
+          "name": "Descriptor 1",
+          "url": "urn:dicax:TC.S",
+          "subject": "Science",
+          "description": "Test Collection A",
+          "identifier": "S",
+          "mainEntity": "urn:dicax:TC.S"
+        }
+      ]
+    }
+  },
+  "_canUpdate": true,
+  "_mainEntityType": "user"
+}
+```
+
+## GET - Settings by ID
+
+### Endpoint
+```
+GET https://matchmakeredlabs.net/api/settings/{settingsID}
+```
+
+**Notes:**
+- Can only be done on a user's own settings object or an organization's settings object for which the user has `ReadDescriptor` privileges.
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter      | Type  | Required | Description                                     |
+|----------------|-------|----------|-------------------------------------------------|
+| `settingsID` | string  | Yes      | User or organization ID of the settings object to be retrieved. |
+
+#### Sample Request
+
+<Tabs
+  groupId="get_settings_by_id"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/settings/user123"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function getSettings(settingsId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/settings/${settingsId}`, {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+getSettings("user123").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+settings_id = "user123"
+url = f'https://matchmakeredlabs.net/api/settings/{settings_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Always "settings_**mainEntityId**" |
+| `type` | string | Always "settings" |
+| `mainEntityId` | string | The user or organization ID that created the settings object. |
+| `matchProfiles` | object array | If it exists, all match profiles owned by the mainEntityId. |
+| `customSets` | object array | If it exists, all custom sets owned by the mainEntityId. |
+| `_canUpdate` | boolean | True if the user has permission to update the settings object, false if not. |
+| `_mainEntityType` | string | Always "user" or "org" |
+
+#### Example Response
+```json
+{
+  "id": "settings_user123",
+  "type": "settings",
+  "mainEntityId": "user123",
+  "matchProfiles": {
+    "testMatchProfile": {
+        "alg-w-cc": "2",
+        "alg-t-cc": "0",
+        "alg-w-cp": "0.49",
+        "alg-t-cp": "0",
+        "alg-w-pc": "0.5",
+        "alg-t-pc": "0",
+        "alg-w-pp": "0.86",
+        "alg-t-pp": "0.16",
+        "alg-w-k": "1",
+        "alg-t-k": "0.66",
+        "alg-w-c": "1",
+        "alg-t-c": "0",
+        "alg-w-p": "1",
+        "alg-t-p": "0",
+        "alg-w-d": "0.1",
+        "alg-t-d": "0"
+    }
+},
+  "customSets": {
+    "testCustomSet": {
+      "descriptors": [
+        {
+          "eleType": "cs",
+          "name": "Descriptor 1",
+          "url": "urn:dicax:TC.S",
+          "subject": "Science",
+          "description": "Test Collection A",
+          "identifier": "S",
+          "mainEntity": "urn:dicax:TC.S"
+        }
+      ]
+    }
+  },
+  "_canUpdate": true,
+  "_mainEntityType": "user"
+}
+```
+
+## POST - Create Settings
+
+### Endpoint
+```
+POST https://matchmakeredlabs.net/api/settings
+```
+
+**Notes:**
+- Can be done for a user's own account or for any organization that the user has `WriteDescriptor` privileges on.
+---
+
+### Request
+
+#### Request Body
+```json
+{
+  "mainEntityId": "user123",
+  "matchProfiles": {
+    "testMatchProfile": {
+        "alg-w-cc": "2",
+        "alg-t-cc": "0",
+        "alg-w-cp": "0.49",
+        "alg-t-cp": "0",
+        "alg-w-pc": "0.5",
+        "alg-t-pc": "0",
+        "alg-w-pp": "0.86",
+        "alg-t-pp": "0.16",
+        "alg-w-k": "1",
+        "alg-t-k": "0.66",
+        "alg-w-c": "1",
+        "alg-t-c": "0",
+        "alg-w-p": "1",
+        "alg-t-p": "0",
+        "alg-w-d": "0.1",
+        "alg-t-d": "0"
+    }
+},
+  "customSets": {
+    "testCustomSet": {
+      "descriptors": [
+        {
+          "eleType": "cs",
+          "name": "Descriptor 1",
+          "url": "urn:dicax:TC.S",
+          "subject": "Science",
+          "description": "Test Collection A",
+          "identifier": "S",
+          "mainEntity": "urn:dicax:TC.S"
+        }
+      ]
+    }
+  },
+  "_canUpdate": true,
+  "_mainEntityType": "user"
+}
+```
+
+#### Request Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `mainEntityId` | string | Yes | User or organization ID of the settings object |
+| `matchProfiles` | object array | No | All match profiles to be associated with the mainEntityId. |
+| `customSets` | object array | No | All custom sets to be associated with the mainEntityId. |
+
+#### Sample Request
+
+<Tabs
+  groupId="create_settings"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{
+    {
+        "mainEntityId": "user123",
+        "matchProfiles": {
+            "testMatchProfile": {
+                "alg-w-cc": "2",
+                "alg-t-cc": "0",
+                "alg-w-cp": "0.49",
+                "alg-t-cp": "0",
+                "alg-w-pc": "0.5",
+                "alg-t-pc": "0",
+                "alg-w-pp": "0.86",
+                "alg-t-pp": "0.16",
+                "alg-w-k": "1",
+                "alg-t-k": "0.66",
+                "alg-w-c": "1",
+                "alg-t-c": "0",
+                "alg-w-p": "1",
+                "alg-t-p": "0",
+                "alg-w-d": "0.1",
+                "alg-t-d": "0"
+            }
+        },
+        "customSets": {
+            "testCustomSet": {
+            "descriptors": [
+                {
+                "eleType": "cs",
+                "name": "Descriptor 1",
+                "url": "urn:dicax:TC.S",
+                "subject": "Science",
+                "description": "Test Collection A",
+                "identifier": "S",
+                "mainEntity": "urn:dicax:TC.S"
+                }
+            ]
+            }
+        },
+        "_canUpdate": true,
+        "_mainEntityType": "user"
+    }
+}' \
+-X POST "https://matchmakeredlabs.net/api/settings"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function createSettings() {
+    const response = await fetch("https://matchmakeredlabs.net/api/settings", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            {
+                "mainEntityId": "user123",
+                "matchProfiles": {
+                    "testMatchProfile": {
+                        "alg-w-cc": "2",
+                        "alg-t-cc": "0",
+                        "alg-w-cp": "0.49",
+                        "alg-t-cp": "0",
+                        "alg-w-pc": "0.5",
+                        "alg-t-pc": "0",
+                        "alg-w-pp": "0.86",
+                        "alg-t-pp": "0.16",
+                        "alg-w-k": "1",
+                        "alg-t-k": "0.66",
+                        "alg-w-c": "1",
+                        "alg-t-c": "0",
+                        "alg-w-p": "1",
+                        "alg-t-p": "0",
+                        "alg-w-d": "0.1",
+                        "alg-t-d": "0"
+                    }
+                },
+                "customSets": {
+                    "testCustomSet": {
+                    "descriptors": [
+                        {
+                        "eleType": "cs",
+                        "name": "Descriptor 1",
+                        "url": "urn:dicax:TC.S",
+                        "subject": "Science",
+                        "description": "Test Collection A",
+                        "identifier": "S",
+                        "mainEntity": "urn:dicax:TC.S"
+                        }
+                    ]
+                    }
+                },
+                "_canUpdate": true,
+                "_mainEntityType": "user"
+            }
+        })
+    });
+    return response.json();
+}
+
+createSettings().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+url = 'https://matchmakeredlabs.net/api/settings'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    {
+        "mainEntityId": "user123",
+        "matchProfiles": {
+            "testMatchProfile": {
+                "alg-w-cc": "2",
+                "alg-t-cc": "0",
+                "alg-w-cp": "0.49",
+                "alg-t-cp": "0",
+                "alg-w-pc": "0.5",
+                "alg-t-pc": "0",
+                "alg-w-pp": "0.86",
+                "alg-t-pp": "0.16",
+                "alg-w-k": "1",
+                "alg-t-k": "0.66",
+                "alg-w-c": "1",
+                "alg-t-c": "0",
+                "alg-w-p": "1",
+                "alg-t-p": "0",
+                "alg-w-d": "0.1",
+                "alg-t-d": "0"
+            }
+        },
+        "customSets": {
+            "testCustomSet": {
+            "descriptors": [
+                {
+                "eleType": "cs",
+                "name": "Descriptor 1",
+                "url": "urn:dicax:TC.S",
+                "subject": "Science",
+                "description": "Test Collection A",
+                "identifier": "S",
+                "mainEntity": "urn:dicax:TC.S"
+                }
+            ]
+            }
+        },
+        "_canUpdate": true,
+        "_mainEntityType": "user"
+    }
+}
+
+response = requests.post(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Always "settings_**mainEntityId**" |
+
+#### Example Response
+
+```json
+{
+  "id": "settings_user123"
+}
+```
+
+## PUT - Update Settings Object
+
+**Notes:**
+- Can only be done on a user's own settings object or an organization's settings object for which the user has `ReadDescriptor` privileges.
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter      | Type  | Required | Description                                     |
+|----------------|-------|----------|-------------------------------------------------|
+| `settingsID` | string  | Yes      | User or organization ID of the settings object to be updated. |
+
+#### Request Body
+```json
+{
+  "mainEntityId": "user123",
+  "matchProfiles": {
+    "updatedMatchProfile": {
+        "alg-w-cc": "2",
+        "alg-t-cc": "0",
+        "alg-w-cp": "0.49",
+        "alg-t-cp": "0",
+        "alg-w-pc": "0.5",
+        "alg-t-pc": "0",
+        "alg-w-pp": "0.86",
+        "alg-t-pp": "0.16",
+        "alg-w-k": "1",
+        "alg-t-k": "0.66",
+        "alg-w-c": "1",
+        "alg-t-c": "0",
+        "alg-w-p": "1",
+        "alg-t-p": "0",
+        "alg-w-d": "0.1",
+        "alg-t-d": "0"
+    }
+},
+  "customSets": {
+    "updatedCustomSet": {
+      "descriptors": [
+        {
+          "eleType": "cs",
+          "name": "Descriptor 1",
+          "url": "urn:dicax:TC.S",
+          "subject": "Science",
+          "description": "Test Collection A",
+          "identifier": "S",
+          "mainEntity": "urn:dicax:TC.S"
+        }
+      ]
+    }
+  },
+  "_canUpdate": true,
+  "_mainEntityType": "user"
+}
+```
+
+#### Request Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `mainEntityId` | string | Yes | User or organization ID of the settings object |
+| `matchProfiles` | object array | No | All match profiles to be associated with the mainEntityId. |
+| `customSets` | object array | No | All custom sets to be associated with the mainEntityId. |
+
+#### Sample Request
+
+<Tabs
+  groupId="update_settings"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-d '{
+    {
+        "mainEntityId": "user123",
+        "matchProfiles": {
+            "updatedMatchProfile": {
+                "alg-w-cc": "2",
+                "alg-t-cc": "0",
+                "alg-w-cp": "0.49",
+                "alg-t-cp": "0",
+                "alg-w-pc": "0.5",
+                "alg-t-pc": "0",
+                "alg-w-pp": "0.86",
+                "alg-t-pp": "0.16",
+                "alg-w-k": "1",
+                "alg-t-k": "0.66",
+                "alg-w-c": "1",
+                "alg-t-c": "0",
+                "alg-w-p": "1",
+                "alg-t-p": "0",
+                "alg-w-d": "0.1",
+                "alg-t-d": "0"
+            }
+        },
+        "customSets": {
+            "updatedCustomSet": {
+            "descriptors": [
+                {
+                "eleType": "cs",
+                "name": "Descriptor 1",
+                "url": "urn:dicax:TC.S",
+                "subject": "Science",
+                "description": "Test Collection A",
+                "identifier": "S",
+                "mainEntity": "urn:dicax:TC.S"
+                }
+            ]
+            }
+        },
+        "_canUpdate": true,
+        "_mainEntityType": "user"
+    }
+}' \
+-X PUT "https://matchmakeredlabs.net/api/settings/user123"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function updateSettings() {
+    const response = await fetch(`https://matchmakeredlabs.net/api/settings/${settingsId}`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({
+            {
+                "mainEntityId": "user123",
+                "matchProfiles": {
+                    "updatedMatchProfile": {
+                        "alg-w-cc": "2",
+                        "alg-t-cc": "0",
+                        "alg-w-cp": "0.49",
+                        "alg-t-cp": "0",
+                        "alg-w-pc": "0.5",
+                        "alg-t-pc": "0",
+                        "alg-w-pp": "0.86",
+                        "alg-t-pp": "0.16",
+                        "alg-w-k": "1",
+                        "alg-t-k": "0.66",
+                        "alg-w-c": "1",
+                        "alg-t-c": "0",
+                        "alg-w-p": "1",
+                        "alg-t-p": "0",
+                        "alg-w-d": "0.1",
+                        "alg-t-d": "0"
+                    }
+                },
+                "customSets": {
+                    "updatedCustomSet": {
+                    "descriptors": [
+                        {
+                        "eleType": "cs",
+                        "name": "Descriptor 1",
+                        "url": "urn:dicax:TC.S",
+                        "subject": "Science",
+                        "description": "Test Collection A",
+                        "identifier": "S",
+                        "mainEntity": "urn:dicax:TC.S"
+                        }
+                    ]
+                    }
+                },
+                "_canUpdate": true,
+                "_mainEntityType": "user"
+            }
+        })
+    });
+    return response.json();
+}
+
+updateSettings().then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+settings_id = "user123"
+url = f'https://matchmakeredlabs.net/api/settings/{settings_id}'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {token}"
+}
+data = {
+    {
+        "mainEntityId": "user123",
+        "matchProfiles": {
+            "updatedMatchProfile": {
+                "alg-w-cc": "2",
+                "alg-t-cc": "0",
+                "alg-w-cp": "0.49",
+                "alg-t-cp": "0",
+                "alg-w-pc": "0.5",
+                "alg-t-pc": "0",
+                "alg-w-pp": "0.86",
+                "alg-t-pp": "0.16",
+                "alg-w-k": "1",
+                "alg-t-k": "0.66",
+                "alg-w-c": "1",
+                "alg-t-c": "0",
+                "alg-w-p": "1",
+                "alg-t-p": "0",
+                "alg-w-d": "0.1",
+                "alg-t-d": "0"
+            }
+        },
+        "customSets": {
+            "updatedCustomSet": {
+            "descriptors": [
+                {
+                "eleType": "cs",
+                "name": "Descriptor 1",
+                "url": "urn:dicax:TC.S",
+                "subject": "Science",
+                "description": "Test Collection A",
+                "identifier": "S",
+                "mainEntity": "urn:dicax:TC.S"
+                }
+            ]
+            }
+        },
+        "_canUpdate": true,
+        "_mainEntityType": "user"
+    }
+}
+
+response = requests.put(url, json=data, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+
+### Response
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Always "settings_**mainEntityId**" |
+
+#### Example Response
+
+```json
+{
+  "id": "settings_user123"
+}
+```
+
+## DELETE - Remove Settings Object
+
+**Notes:**
+- Can only be done on a user's own settings object or an organization's settings object for which the user has `ReadDescriptor` privileges.
+---
+
+### Request
+
+#### Path Parameters
+
+| Parameter      | Type  | Required | Description                                     |
+|----------------|-------|----------|-------------------------------------------------|
+| `settingsID` | string  | Yes      | User or organization ID of the settings object to be deleted. |
+
+#### Sample Request
+
+<Tabs
+  groupId="delete_settings"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X DELETE "https://matchmakeredlabs.net/api/settings/user123"
+```
+</TabItem>
+
+<TabItem value="js">
+```js
+async function deleteSettings(settingsId) {
+    const response = await fetch(`https://matchmakeredlabs.net/api/settings/${settingsId}`, {
+        method: "DELETE",
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        }
+    });
+    return response.json();
+}
+
+deleteSettings("user123").then(data => console.log(data));
+```
+</TabItem>
+
+<TabItem value="python">
+```python
+import requests
+
+token = "<your_token>"
+settings_id = "user123"
+url = f'https://matchmakeredlabs.net/api/settings/{settings_id}'
+headers = {
+    'Authorization': f"Bearer {token}"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</TabItem>
+</Tabs>
+
+### Response
+#### Response Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Always "settings_**mainEntityId**" |
+
+#### Example Response
+
+```json
+{
+  "id": "settings_user123"
+}
+```
