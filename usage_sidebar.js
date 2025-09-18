@@ -45,11 +45,6 @@ const sidebars = {
           items: [
             {
               type: "doc",
-              id: "starting/collections/intro",
-              label: "Introduction",
-            },
-            {
-              type: "doc",
               id: "starting/collections/create",
               label: "How to Create a Collection?",
             },
