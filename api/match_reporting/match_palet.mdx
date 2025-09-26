@@ -23,7 +23,8 @@ POST https://matchmakeredlabs.net/api/match/palet
 
 **Notes:**
 - Requires authentication
-- Uses Vector Space Model (VSM) for text similarity matching
+- If useVectorSearch is specified, ses Vector Space Model (VSM) for text similarity matching
+- Otherwise, uses strict keyword matching to generate results
 - Results are ranked by cosine similarity
 - Matches are filtered based on keywords from the query text
 - Maximum of 10,000 results will be returned
@@ -31,6 +32,15 @@ POST https://matchmakeredlabs.net/api/match/palet
 ---
 
 ### Request
+#### Query Parameters
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `useVectorSearch` | No | If specifed, uses Vector Space Model as opposed to strict keyword matching |
+
+With this parameter, the endpoint would be:
+```
+POST https://matchmakeredlabs.net/api/match/palet?useVectorSearch
+```
 
 #### Request Body
 ```json
