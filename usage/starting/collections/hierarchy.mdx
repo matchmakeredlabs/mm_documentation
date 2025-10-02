@@ -1,0 +1,143 @@
+import ReactPlayer from 'react-player'
+import HierarchyExample from '@site/static/img/Hierarchy/mm_collection_ex.png';
+import CreateButton from '@site/static/img/Create/mm_dash_create.png';
+import SearchCollections from '@site/static/img/Hierarchy/mm_manage_collections_search.png';
+import SelectedCollection from '@site/static/img/Hierarchy/mm_manage_query.png';
+import IntroHierarchy from '@site/static/img/Hierarchy/collections_hierarchy_intro.png';
+import CreateElement from '@site/static/img/Hierarchy/mathhelp_empty_element_creation.png';
+import MathHelpSite from '@site/static/img/Hierarchy/mathhelp_page.png';
+import AlgElement from '@site/static/img/Hierarchy/mathhelp_alg1_element.png';
+import FirstElement from '@site/static/img/Hierarchy/mathhelp_add_first_element.png';
+import HierarchyElement from '@site/static/img/Hierarchy/mathhelp_selected_element_ex.png';
+import TypoIntro from '@site/static/img/Hierarchy/mathhelp_typo_intro.png';
+import TypoFix from '@site/static/img/Hierarchy/mathhelp_typo_fix.png';
+import HierarchyComplete from '@site/static/img/Hierarchy/mathhelp_complete_collection.png';
+
+
+# How to Build a Collection Hierarchy?
+
+:::note[Video Tutorial]
+Here is the matching video tutorial for this section:
+<div style={{marginLeft: "auto", marginRight: "auto", maxWidth: "stretch", textAlign: "center"}}>
+<ReactPlayer controls="true" width="90%" height="500px" src={"https://www.youtube.com/watch?v=IO9zRUMPvCM"} />
+</div>
+:::
+
+The next step after creating a collection is to provide a hierarchy; organizing your content into clean sections which naturally lead to a lesson-like structure. With a consistently structured hierarchy, it becomes easy to describe your collection using statements from the Palet<sup style={{fontSize: 8}}>TM</sup>.
+<div style={{textAlign: "center"}}>
+<img src={HierarchyExample?.src || HierarchyExample} width="60%" alt="The documentation hierarchy is shown"/>
+*The hierarchy for this user documentation as a MatchMaker collection*
+</div>
+This is a __key__ step, so if what you plan to represent in MatchMaker doesn’t naturally have a hierarchical structure, spend some time sketching out a hierarchy such that small, specific pieces of content or activities reside at the bottom level of your hierarchy. For more information on best practices around organizing your hierarchy take a look at the example below, as well as [“How to Describe Elements?”](/usage/starting/collections/describe) for a deeper understanding of what a well-built hierarchy should enable.
+
+## Math Help: Creating a Learning Resource Hierarchy
+Just as you created your first collection for Math Help and prepare to shut down your computer, Mrs. MathHelp (CEO of Math Help) comes knocking on your door, demanding you complete the collection hierarchy for Algebra 1. You may need to find the collection you’ve made. So, we’ll learn how to find and edit an existing collection. Otherwise, you can continue as if you pressed “Create Collection and Edit” in the previous section, and you can skip ahead to [“Implementing our Hierarchy”](#implementing-our-hiearchy-in-matchmaker).
+### Modifying an Existing Collection
+Rushing to log back in to MatchMaker, you arrive at the dashboard.
+<div style={{textAlign: "center"}}>
+<img  src={CreateButton?.src || CreateButton} width="80%" alt="Placeholder alt"/>
+</div>
+In the dashboard, press the orange “Create” button.
+<div style={{textAlign: "center"}}>
+<img  src={SearchCollections?.src || SearchCollections} width="80%" alt="The manage collections page is visible, and the Enter Keyword box is circled"/>
+</div>
+Once you reach the Manage Collections page, there’s a variety of ways to find your collection, however, one way is to search up part of the name of the collection (Math Help’s Mathematical Resources). For example, type “Math Help” into the circled box labeled “Enter Keyword…” and then press “+ Filter”. Now your search query has been added as a filter.
+<div style={{textAlign: "center"}}>
+<img  src={SelectedCollection?.src || SelectedCollection} width="80%" alt="The manage collections page is visible, and the only collection displayed is Math Helps Mathematical Resources, and is circled as well"/>
+</div>
+Press <div style={{color: "blue", margin: 0, display: 'contents'}}><u>“Math Help’s Mathematical Resources”</u></div> to begin, and complete Mrs. MathHelp’s urgent demand in service of struggling students.
+
+### Implementing our Hierarchy
+<div style={{textAlign: "center"}}>
+<img  src={IntroHierarchy?.src || IntroHierarchy} width="80%" alt="The collection edit page is shown and sections are boxed and numbered. The name of the collection (1), plus and X buttons (2), a section displaying descriptions (3)"/>
+</div>
+:::info
+**1.** The name of the Collection is the highest level in the hierarchy, and starts out selected and bolded
+
+**2.** When an element is selected, you can add new “elements” underneath 
+
+**3.** Information about selected elements is displayed and modifiable here
+* “Clear”: empties all fields
+* “Reset”: will undo all unsaved changes
+* “Save”: saves your changes
+:::
+You are now in the collections edit view where you can remove and add elements to your collection in order to flesh out a hierarchy. The title of the collection and the collection information sits at the top and is always the highest level of the hierarchy. The title can be thought of as the “top element” of your hierarchy. With no time to waste, you get started on building out the hierarchy by pressing the “+” next to “Math Help’s Mathematical Resources” to add a new element. 
+<div style={{textAlign: "center"}}>
+<img  src={CreateElement?.src || CreateElement} width="60%" alt="The create element page is shown, fields are filled in, inheriting from the collections description"/>
+</div>
+:::info
+**Name**  <div style={{color: "red", margin: 0, display: 'contents'}}>*</div> - The title of the element
+
+**Type**  <div style={{color: "red", margin: 0, display: 'contents'}}>*</div> - The kind of element it is (a collection may have elements which don’t quite fit its type), one of the four: 
+
+* **Learning Resource** -
+An online curriculum, book, activity, reference, or other source of information.
+
+* **Competency Statement** -
+A certification, examination, or some other source of knowledge verification 
+
+* **Curriculum** -
+The scope and sequence of a class or course.
+
+* **Other** -
+Anything else!
+**Organization**  <div style={{color: "red", margin: 0, display: 'contents'}}>*</div> - The authoring MatchMaker organization, must be one you have access to
+
+**URL / Location** - A real URL or associated location for the element. This must be unique between elements (including the collection title).
+MatchMaker will automatically generate a URL for the top element if you leave the field blank when creating a collection. MatchMaker will then add numbered sections for you when you create a new element (e.g. URL/1/2).
+
+You can choose to avoid this system altogether, but ensure that it makes sense for your URL / Location to be unique for each element you place in the hierarchy. For example, an online learning resource should use its own URL, as all elements have a unique webpage associated with them.
+
+
+**Description** - Some useful information about the collection 
+
+**Subject** - A subject associated with the collection (i.e. English, History)
+
+**Publisher** - The organization which published the material covered in the collection (i.e. a textbook publishing business)
+
+**Identifier** - A shorthand name for your collection
+
+**Educational Level** - The level of education targeted by the collection (i.e Multivariable Calculus may have “Undergraduate” as its educational level)
+
+**Creator** - The writer(s) of the material associated with the collection
+
+**Date Published** - The date the material associated with the collection was released
+
+**Repository Date** - The date the collection was added to MatchMaker
+
+**Provenance** - The person(s) creating and describing the collection in MatchMaker (you!)  
+:::
+
+You are now prompted to add some information about your new element. Since this element exists under “Math Help Mathematical Resources”, it begins with all of its information, except for “Name” and “Description” as those are unique to each element. Additionally, MatchMaker autogenerates a URL/Location for this element, you can leave it untouched for all elements in this collection. You begin adding in Mrs. Math Help’s beautiful Algebra 1 hierarchy… until suddenly you realize you’ve completely forgotten it! You frantically pull up the Math Help page and navigate to Math Help’s Algebra 1 resources.
+<div style={{textAlign: "center"}}>
+<img  src={MathHelpSite?.src || MathHelpSite} width="80%" alt="Placeholder alt"/>
+</div>
+Excellent, you now have the Algebra 1 hierarchy for Math Help’s resources. You begin from the top of this hierarchy and move down. Therefore, you type in the below information for “Algebra 1”, although you only really need the **Name**.
+<div style={{textAlign: "center"}}>
+<img  src={AlgElement?.src || AlgElement} width="60%" alt="Placeholder alt"/>
+</div>
+Press “Create Element” to add this element to the collection.
+<div style={{textAlign: "center"}}>
+<img  src={FirstElement?.src || FirstElement} width="60%" alt="Placeholder alt"/>
+</div>
+Your first element in this collection has now been added! Now select the Algebra 1 element by clicking on its name, making visible the addition (“+”) and deletion (“x”) buttons for the element. Additionally, the card will display what has been entered on the right.
+<div style={{textAlign: "center"}}>
+<img  src={HierarchyElement?.src || HierarchyElement} width="80%" alt="Placeholder alt"/>
+</div>
+Go ahead and add in some more elements below; simply repeating the process to represent the full Math Help Algebra 1 resources hierarchy in MatchMaker.
+<div style={{textAlign: "center"}}>
+<img  src={TypoIntro?.src || TypoIntro} width="80%" alt="Placeholder alt"/>
+</div>
+And the hierarchical representation is done! This will enable the MatchMaker magic in the next step, “How to Build a Hierarchy?”. 
+
+-Math Help users surely will have a wonderful experience “Eating the Square”...oh no…a typo (and perhaps you may make some of your own in the process)! To fix it, click on “Eating the Square”... in the hierarchy to bring up the information about it and make your edits…
+<div style={{textAlign: "center"}}>
+<img  src={TypoFix?.src || TypoFix} width="80%" alt="Placeholder alt"/>
+</div>
+Click on the field with the name, fix the typo, and change it to “Completing the Square” (1). Then, press “Save” to ensure the changes are applied (2).
+<div style={{textAlign: "center"}}>
+<img  src={HierarchyComplete?.src || HierarchyComplete} width="80%" alt="Placeholder alt"/>
+</div>
+Finally, you have completed the Algebra 1 hierarchy for Math Help! 
+{/* If you have any confusion about the process, feel free to watch the corresponding video for the section below (incomplete)! */}
+Now that you have created a collection hierarchy, in the next section, [“How to Describe Elements?”](/usage/starting/collections/describe), you will start describing the Math Help elements just created, the final step for your collection to be dynamically related to other collections.

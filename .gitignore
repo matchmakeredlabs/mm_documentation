@@ -4,10 +4,15 @@
 # Production
 /build
 
+# Too Big
+/static/video
+
 # Generated files
 .docusaurus
 .cache-loader
 .cache
+yarn.lock
+package-lock.json
 
 # Misc
 .DS_Store

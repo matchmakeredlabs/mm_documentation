@@ -35,68 +35,46 @@ const sidebars = {
         },
         {
           type: "category",
-          label: "How to Describe a Collection?",
+          label: "How to Build and Describe a Collection?",
           collapsible: true,
           collapsed: true,
           link: {
             type: "doc",
-            id: "starting/describe/intro",
+            id: "starting/collections/intro",
           },
           items: [
             {
               type: "doc",
-              id: "starting/describe/intro",
-              label: "Introduction",
+              id: "starting/collections/create",
+              label: "How to Create a Collection?",
             },
             {
               type: "doc",
-              id: "starting/describe/hierarchy",
-              label: "How to Build a Hierarchy?",
+              id: "starting/collections/hierarchy",
+              label: "How to Build a Collection Hierarchy?",
             },
             {
               type: "doc",
-              id: "starting/describe/describe",
+              id: "starting/collections/describe",
               label: "How to Describe Elements?",
-            },
-            {
-              type: "doc",
-              id: "starting/describe/exporting",
-              label: "How to Export a Collection?",
-            },
-          ],
-        },
-        {
-          type: "category",
-          label: "Generating a Report",
-          collapsible: true,
-          collapsed: true,
-          link: {
-            type: "doc",
-            id: "starting/report/intro",
-          },
-          items: [
-            {
-              type: "doc",
-              id: "starting/report/custom_sets",
-              label: "How to Make Custom Sets?",
-            },
-            {
-              type: "doc",
-              id: "starting/report/matching",
-              label: "Matching!",
             },
           ],
         },
         {
           type: "doc",
-          label: "How to Manage an Organization?",
-          id: "starting/manage/intro",
+          label: "How to Generate a Report?",
+          id: "starting/report",
+        },
+        {
+          type: "doc",
+          label: "Frequently Asked Questions",
+          id: "faq",
         },
       ],
     },
     {
       type: "category",
-      label: "Example Workflows",
+      label: "MatchMaker in Practice",
       collapsible: true,
       collapsed: true,
       link: {
@@ -105,33 +83,202 @@ const sidebars = {
       },
       items: [
         {
-          type: "doc",
-          id: "use_cases/intro",
-          label: "Introduction",
+          type: "category",
+          label: "Transfer Students with MatchMaker",
+          collapsible: true,
+          collapsed: true,
+          link: {
+            type: "doc",
+            id: "use_cases/uni/intro",
+          },
+          items: [
+            {
+              type: "doc",
+              id: "use_cases/uni/intro",
+              label: "Sabrina's Story",
+            },
+            {
+              type: "doc",
+              id: "use_cases/uni/explain",
+              label: "Bullford's Implementation",
+            },
+            {
+              type: "doc",
+              id: "use_cases/uni/conclusion",
+              label: "Conclusion",
+            },
+          ],
         },
-      ],
-    },
-    {
-      type: "category",
-      label: "Functionality and Vocabulary",
-      collapsible: true,
-      collapsed: true,
-      link: {
-        type: "doc",
-        id: "vocab/intro",
-      },
-      items: [
         {
-          type: "doc",
-          id: "vocab/intro",
-          label: "Introduction",
+          type: "category",
+          label: "Career Change with MatchMaker",
+          collapsible: true,
+          collapsed: true,
+          link: {
+            type: "doc",
+            id: "use_cases/career_change/intro",
+          },
+          items: [
+            {
+              type: "doc",
+              id: "use_cases/career_change/intro",
+              label: "Alex's Story",
+            },
+            {
+              type: "doc",
+              id: "use_cases/career_change/explain",
+              label: "International Health Source's Implementation",
+            },
+            {
+              type: "doc",
+              id: "use_cases/career_change/conclusion",
+              label: "Conclusion",
+            },
+          ],
         },
       ],
     },
     {
       type: "doc",
-      label: "MatchMaker FAQ",
-      id: "faq/intro",
+      id: "vocab/login_dash",
+      label: "Login and Dashboard",
+    },
+    {
+      type: "category",
+      label: "Create - Collection Management",
+      collapsible: true,
+      collapsed: true,
+      link: {
+        type: "doc",
+        id: "vocab/create/intro",
+      },
+      items: [
+        {
+          type: "category",
+          collapsible: true,
+          collapsed: true,
+          label: "Create a Collection",
+          link: {
+            type: "doc",
+            id: "vocab/create/create_collection/index",
+          },
+          items: [
+            {
+              type: "doc",
+              label: "Editing a Collection",
+              id: "vocab/create/edit",
+            },
+          ],
+        },
+        {
+          type: "doc",
+          id: "vocab/create/edit",
+          label: "Edit",
+        },
+        {
+          type: "doc",
+          id: "vocab/create/import_export",
+          label: "Import and Export",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Browse and Describe - View and Describe Collections",
+      collapsible: true,
+      collapsed: true,
+      link: {
+        type: "doc",
+        id: "vocab/browse_describe/intro",
+      },
+      items: [
+        {
+          type: "category",
+          label: "Find and Select Statements",
+          link: {
+            type: "doc",
+            id: "vocab/browse_describe/describe/index",
+          },
+          items: [
+            {
+              type: "doc",
+              label: "The Palet",
+              id: "vocab/browse_describe/describe/palet",
+            },
+            {
+              type: "doc",
+              label: "Element Descriptor",
+              id: "vocab/browse_describe/describe/descriptor",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Generate Report - Insight",
+      collapsible: true,
+      collapsed: true,
+      link: {
+        type: "doc",
+        id: "vocab/report_gen/intro",
+      },
+      items: [
+        {
+          type: "category",
+          label: "Matching Sets",
+          collapsible: true,
+          collapsed: true,
+          link: {
+            type: "doc",
+            id: "vocab/report_gen/match_sets/intro",
+          },
+          items: [
+            {
+              type: "doc",
+              id: "vocab/report_gen/match_sets/selection",
+              label: "Selection of Sets",
+            },
+            {
+              type: "doc",
+              id: "vocab/report_gen/match_sets/weighting",
+              label: "Weighting of Matches",
+            },
+            {
+              type: "doc",
+              id: "vocab/report_gen/match_sets/results",
+              label: "Processing Results",
+            },
+          ],
+        },
+        {
+          type: "doc",
+          id: "vocab/report_gen/custom_sets",
+          label: "Custom Sets",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Administration",
+      collapsible: true,
+      collapsed: true,
+      link: {
+        type: "doc",
+        id: "vocab/admin/intro",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "vocab/admin/organizations",
+          label: "Organizations",
+        },
+        {
+          type: "doc",
+          id: "vocab/admin/groups",
+          label: "Groups",
+        },
+      ],
     },
 
     // {

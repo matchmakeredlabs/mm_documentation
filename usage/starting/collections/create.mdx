@@ -1,0 +1,75 @@
+import ReactPlayer from 'react-player'
+import CreateButton from '@site/static/img/Create/mm_dash_create.png';
+import ManageCollectionsIntro from '@site/static/img/Create/mm_manage_collections_intro.png';
+import CreateCollection from '@site/static/img/Create/mm_create_collection.png';
+import MathHelpCollection from '@site/static/img/Create/mathhelp_example_collection.png';
+
+# How to Create a Collection?
+
+:::note[Video Tutorial]
+Here is the matching video tutorial for this section:
+<div style={{marginLeft: "auto", marginRight: "auto", maxWidth: "stretch", textAlign: "center"}}>
+<ReactPlayer controls="true" width="90%" height="500px" src={"https://www.youtube.com/watch?v=1gflDvSSIuM"} />
+</div>
+:::
+
+To begin, press "Create" on the dashboard.
+<div style={{textAlign: "center"}}>
+<img  src={CreateButton?.src || CreateButton} width="80%" alt="The dashboard is shown and the create button is circled"/>
+</div>
+We're greeted with the Manage Collections page, containing a variety of elements.
+<div style={{textAlign: "center"}}>
+ <img  src={ManageCollectionsIntro?.src || ManageCollectionsIntro} width="80%" alt="The main manage collections page is shown"/>   
+ </div>
+:::info
+  <div style={{color: "red", margin: 0, display: 'contents'}}>**1.**</div> Display of all visible collections, with an option to edit any you have access to <br /> <div style={{color: "red", margin: 0, display: 'contents'}}>**2.**</div> The "Create New Collection" button, allowing you to add a collection under your organization 
+:::
+Press the "Create New Collection" button to create a new collection. You will now be greeted with the collection creation screen.
+<div style={{textAlign: "center"}}>
+<img  src={CreateCollection?.src || CreateCollection} width="55%" alt="A collection create display appears"/>
+</div>
+:::info
+**Name**  <div style={{color: "red", margin: 0, display: 'contents'}}>*</div> - The title of the collection
+
+**Type**  <div style={{color: "red", margin: 0, display: 'contents'}}>*</div> - The kind of collection it is, one of the four:
+
+* **Learning Resource** -
+An online curriculum, book, activity, reference, or other source of information.
+
+* **Competency Statement** -
+A certification, examination, or some other source of knowledge verification 
+
+* **Curriculum** -
+The scope and sequence of a class or course.
+
+* **Other** -
+Anything else!
+**Organization**  <div style={{color: "red", margin: 0, display: 'contents'}}>*</div> - The authoring MatchMaker organization, must be one you have access to
+
+**URL / Location** - A location (not recommended, will be discussed further in the next section) or real URL if applicable; MatchMaker will autogenerate a URL if you do not fill out this field
+
+**Description** - Some useful information about the collection 
+
+**Subject** - A subject associated with the collection (i.e. English, History)
+
+**Publisher** - The organization which published the material covered in the collection (i.e. a textbook publishing business)
+
+**Identifier** - A shorthand name for your collection
+
+**Educational Level** - The level of education targeted by the collection (i.e Multivariable Calculus may have “Undergraduate” as its educational level)
+
+**Creator** - The writer(s) of the material associated with the collection
+
+**Date Published** - The date the material associated with the collection was released
+
+**Repository Date** - The date the collection was added to MatchMaker
+
+**Provenance** - The person(s) creating and describing the collection in MatchMaker (you!)  
+:::
+At this page, you must enter the corresponding information about your collection in the fields with the red asterisks, optionally filling in the other fields to better document your collection. 
+## Math Help: Creating a Learning Resources Collection
+To tap into MatchMaker’s repository of mathematical competencies or curriculum standards, Math Help tasks you with creating a collection for their learning resource. To do this, fill out the fields as such:  
+<div style={{textAlign: "center"}}>
+<img  src={MathHelpCollection?.src || MathHelpCollection} width="60%" alt="A collection preview is displayed"/>
+</div>
+Finally, create this collection by either pressing the “Create Collection” (yellow) or “Create and Edit Collection” (green). “Create Collection” will simply create your collection, meanwhile, “Create and Edit Collection” will create your collection and take you to the edit page to build your collection. Press the green button: “Create and Edit Collection”, in the next section, you will learn what to do next, that is: [How to Build a Hierarchy?](/usage/starting/collections/hierarchy)

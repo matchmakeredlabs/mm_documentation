@@ -26,7 +26,6 @@ const config = {
   projectName: "mm_documentation", // Usually your repo name.
 
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -54,6 +53,7 @@ const config = {
     ],
   ],
   plugins: [
+    "docusaurus-plugin-image-zoom",
     [
       "@docusaurus/plugin-content-docs",
       {
@@ -61,6 +61,16 @@ const config = {
         path: "api",
         routeBasePath: "api",
         sidebarPath: "./api_sidebar.js",
+      },
+    ],
+    [
+      "@docusaurus/plugin-ideal-image",
+      {
+        quality: 70,
+        max: 1030, // max resized image's size.
+        min: 640, // min resized image's size. if original is lower, use that size.
+        steps: 2, // the max number of images generated between min and max (inclusive)
+        disableInDev: true,
       },
     ],
   ],
@@ -86,12 +96,12 @@ const config = {
             position: "left",
             target: "_self",
           },
-          // {
-          //   type: "doc",
-          //   position: "left",
-          //   docId: "starting/intro",
-          //   label: "User Docs",
-          // },
+          {
+            type: "doc",
+            position: "left",
+            docId: "starting/intro",
+            label: "User Docs",
+          },
           {
             position: "left",
             to: "/api/intro",
@@ -126,10 +136,10 @@ const config = {
                 label: "Home",
                 href: "/",
               },
-              // {
-              //   label: "Usage",
-              //   to: "/usage/starting/intro",
-              // },
+              {
+                label: "Usage",
+                to: "/usage/starting/intro",
+              },
               {
                 label: "API",
                 to: "/api/intro",
@@ -142,6 +152,16 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+      },
+      zoom: {
+        selector: ".markdown :not(em) > img",
+        background: {
+          light: "rgb(255, 255, 255)",
+          dark: "rgb(50, 50, 50)",
+        },
+        config: {
+          // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+        },
       },
     }),
 };
