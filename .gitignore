@@ -4,6 +4,9 @@
 # Production
 /build
 
+# Too Big
+/static/video
+
 # Generated files
 .docusaurus
 .cache-loader

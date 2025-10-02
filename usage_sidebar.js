@@ -51,7 +51,7 @@ const sidebars = {
             {
               type: "doc",
               id: "starting/collections/hierarchy",
-              label: "How to Build a Hierarchy?",
+              label: "How to Build a Collection Hierarchy?",
             },
             {
               type: "doc",
@@ -66,85 +66,75 @@ const sidebars = {
           id: "starting/report",
         },
         {
+          type: "doc",
+          label: "Frequently Asked Questions",
+          id: "faq",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "MatchMaker in Practice",
+      collapsible: true,
+      collapsed: true,
+      link: {
+        type: "doc",
+        id: "use_cases/intro",
+      },
+      items: [
+        {
           type: "category",
-          label: "Example Workflows",
+          label: "Transfer Students with MatchMaker",
           collapsible: true,
           collapsed: true,
           link: {
             type: "doc",
-            id: "use_cases/intro",
+            id: "use_cases/uni/intro",
           },
           items: [
             {
               type: "doc",
-              id: "use_cases/intro",
-              label: "Introduction",
+              id: "use_cases/uni/intro",
+              label: "Sabrina's Story",
             },
             {
-              type: "category",
-              label: "Transfer Students with MatchMaker",
-              collapsible: true,
-              collapsed: true,
-              link: {
-                type: "doc",
-                id: "use_cases/uni/intro",
-              },
-              items: [
-                {
-                  type: "doc",
-                  id: "use_cases/uni/intro",
-                  label: "Introduction",
-                },
-                {
-                  type: "doc",
-                  id: "use_cases/uni/collections",
-                  label: "Moving Courses into MatchMaker",
-                },
-                {
-                  type: "doc",
-                  id: "use_cases/uni/matching",
-                  label: "Matching Transfer Courses",
-                },
-                {
-                  type: "doc",
-                  id: "use_cases/uni/conclusion",
-                  label: "Conclusion",
-                },
-              ],
+              type: "doc",
+              id: "use_cases/uni/explain",
+              label: "Bullford's Implementation",
             },
             {
-              type: "category",
-              label: "Career Change with MatchMaker",
-              collapsible: true,
-              collapsed: true,
-              link: {
-                type: "doc",
-                id: "use_cases/career_change/intro",
-              },
-              items: [
-                {
-                  type: "doc",
-                  id: "use_cases/career_change/intro",
-                  label: "Introduction",
-                },
-                {
-                  type: "doc",
-                  id: "use_cases/career_change/matching",
-                  label: "Matching Existing Knowledge with New Requirements",
-                },
-                {
-                  type: "doc",
-                  id: "use_cases/career_change/conclusion",
-                  label: "Conclusion",
-                },
-              ],
+              type: "doc",
+              id: "use_cases/uni/conclusion",
+              label: "Conclusion",
             },
           ],
         },
         {
-          type: "doc",
-          label: "Frequently Asked Questions",
-          id: "faq",
+          type: "category",
+          label: "Career Change with MatchMaker",
+          collapsible: true,
+          collapsed: true,
+          link: {
+            type: "doc",
+            id: "use_cases/career_change/intro",
+          },
+          items: [
+            {
+              type: "doc",
+              id: "use_cases/career_change/intro",
+              label: "Alex's Story",
+            },
+            {
+              type: "doc",
+              id: "use_cases/career_change/explain",
+              label: "International Health Source's Implementation",
+            },
+            {
+              type: "doc",
+              id: "use_cases/career_change/conclusion",
+              label: "Conclusion",
+            },
+          ],
         },
       ],
     },
