@@ -1,6 +1,6 @@
-# Website
+# MatchMaker Documentation
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+This Docusarus-enabled website hosts MatchMaker's API and User documentation, allowing MatchMaker customers to easily get up to speed with the platform.
 
 ### Installation
 
