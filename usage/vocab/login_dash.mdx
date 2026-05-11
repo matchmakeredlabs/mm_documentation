@@ -1,1 +1,67 @@
-Incomplete Page
+import LoginPage from '@site/static/img/login_page.png';
+
+# Login
+This is the first page you’ll see when you open MatchMaker.
+<div style={{textAlign: "center"}}>
+<img src={LoginPage?.src || LoginPage} width="100%" alt=""/>
+</div>
+Type in your provided username into the Username field at the top, and your provided password in the Password field right below. Finally, press Login to start using MatchMaker. Note, your session will expire in 24 hours after your login.
+
+# Dashboard
+This is your portal to MatchMaker: the dashboard. Note you may see fewer buttons than the ones shown below, depending on your permissions. If you think you should have access to a button but do not see it, please contact your administrator.
+
+
+{/* display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 10em;
+  height: 7em;
+  border: none;
+  color: white;
+  margin: 4px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 0.4s;
+  position: relative;
+  padding: 10px;
+  overflow: hidden;
+  text-decoration: none; */}
+
+<div style={{textAlign: "center"}}>
+<div style={{display: "flex", justifyContent: "center", flexWrap: "wrap"}}>
+<a href={"/mm_documentation/usage/vocab/create/intro"} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "10em", height: "8em", border: "none", color: "white", backgroundColor: "#ba7412", margin: "4px", cursor: "pointer", borderRadius: "12px", transition: "background-color 0.4s", position: "relative", padding: "10px", overflow: "hidden", textDecoration: "none", borderRadius: "12px"}}>
+<br/>
+<div style={{marginTop: "5px", fontWeight: "bold", fontSize: "1em"}}>Create</div>
+<div style={{fontSize: "0.85em"}}>Create, register, and manage collections</div>
+</a>
+<a href={"/mm_documentation/usage/vocab/browse_describe/intro"} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "10em", height: "8em", border: "none", color: "white", backgroundColor: "green", margin: "4px", cursor: "pointer", borderRadius: "12px", transition: "background-color 0.4s", position: "relative", padding: "10px", overflow: "hidden", textDecoration: "none", borderRadius: "12px"}}>
+<br/>
+<div style={{marginTop: "5px", fontWeight: "bold", fontSize: "1em"}}>Browse & Describe</div>
+<div style={{fontSize: "0.85em"}}> Browse and Describe Available Elements</div>
+</a>
+<a href={"/mm_documentation/usage/vocab/report_gen/intro"} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "10em", height: "8em", border: "none", color: "white", backgroundColor: "blue", margin: "4px", cursor: "pointer", borderRadius: "12px", transition: "background-color 0.4s", position: "relative", padding: "10px", overflow: "hidden", textDecoration: "none", borderRadius: "12px"}}>
+<br/>
+<div style={{marginTop: "5px", fontWeight: "bold", fontSize: "1em"}}>Generate Report</div>
+<div style={{fontSize: "0.85em"}}>Generate reports from described elements</div>
+</a>
+<a href={"/mm_documentation/usage/vocab/admin/intro"} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "10em", height: "8em", border: "none", color: "white", backgroundColor: "gray", margin: "4px", cursor: "pointer", borderRadius: "12px", transition: "background-color 0.4s", position: "relative", padding: "10px", overflow: "hidden", textDecoration: "none", borderRadius: "12px"}}>
+<br/>
+<div style={{marginTop: "5px", fontWeight: "bold", fontSize: "1em"}}>Administer</div>
+<div style={{fontSize: "0.85em"}}>Manage collaboration settings</div>
+</a>
+</div>
+</div>
+
+
+
+Click on any of the above buttons to learn more about that section. Here’s a quick summary:
+## Create
+Create and edit collections you have access to, either creating or modifying a hierarchy.
+## Browse & Describe
+View all available collections, and start describing elements in collections you have such access to.
+## Generate Report
+Gain insights from matching collections and custom sets to one another. Additionally, you can create and edit custom edits in this section.
+## Administer
+The center for all permission management. Here you can manage users, organizations you have access to, and groups.
