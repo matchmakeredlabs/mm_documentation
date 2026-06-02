@@ -24,17 +24,18 @@ Here is the matching video tutorial for this section:
 </div>
 :::
 
-Now that you’ve learned how to create a collection, it’s time to have some fun(?!) and start matching collections to gain valuable insights. You’ll learn how to generate a report in which every element has insightful matches in other collections you’ve selected. This is where the real power of MatchMaker begins (and also where the work ends).
+Now that you've learned how to create a collection, it's time to get down to the heart of MatchMaker, gaining valuable insights by matching between collections. You'll learn how to generate a report in which every element has insightful matches in to other collections you've selected. This is where the real power of MatchMaker begins (also where your work ends). 
 <div style={{textAlign: "center"}}>
 <img src={ReportGraphic?.src || ReportGraphic} width="50%" alt="Placeholder alt"/>
 </div>
-There’s a lot of potential customizability in this section, but for now, let’s get you up and running. Firstly, it’s important to know two pieces of vocabulary before we begin. When you match collections in MatchMaker, there’s two types: independent and dependent collections.
-## Dependent Collections
-<u>Dependent collections</u> can be thought of as the pool of knowledge you want to match to, in essence, what collections you want to search through. In the case of Malia’s usage of Math Help for learning resources, the <u>dependent collection(s)</u> would be the Math Help collection, containing all Math Help resources.
-## Independent Collections
-<u>Independent collections</u> can be thought of as the collections you want to query based on the dependent collections and generate matches from. If dependent collections are a pool of knowledge, <u>independent collections</u> are more akin to a fishing rod. In Malia’s case, the <u>dependent collection(s)</u> would be his Algebra 1 curriculum.
-## Math Help: Generating Malia's Math Help Matches
-We’re almost ready to deploy some matches to the Math Help site, but for good practice, let’s test out these matches on MatchMaker first. Malia deserves nothing but the best, as the one and only customer of Math Help (don’t tell Dr. Math Help). Once again, begin in the dashboard:
+There's a lot of potential for customization in this section. For now, let's get you up and running. It's important to know two pieces of vocabulary before we begin. When you match collections in MatchMaker, there's two types of collections: 
+1. __Anchored__ - anchoring occurs when individuals use a particular collection(s)—the "anchor"— as a reference point to make subsequent matches. In this example, Algebra 1, the mandatory curriculum that reflects the content to be mastered by students, serves as the anchored collection. 
+
+2. __Responding__ - the responding collection(s) reacts to the anchored collection(s) by providing meaningful matches. In this example, Math Help, a resource that supports Malia's Algebra 1 curriculum, is the responding collection.
+## Creating Malia's Math Help Matches
+We're almost ready to discover matches from Math Help. Let's test out some matches that will support Malia.  
+
+We begin in the dashboard: 
 <div style={{textAlign: "center"}}>
 <img src={ReportButton?.src || ReportButton} width="80%" alt="Placeholder alt"/>
 </div>
@@ -43,26 +44,26 @@ Click on the “Generate Report” button in the Dashboard.
 <img src={MatchButton?.src || MatchButton} width="80%" alt="Placeholder alt"/>
 </div>
 Then click on “Match Sets” to start matching collections.
-### Selecting Dependent and Independent Collections
+### Selecting Anchored and Responding Collections
 <div style={{textAlign: "center"}}>
 <img src={AnnotatedMatchPage?.src || AnnotatedMatchPage} width="50%" alt="Placeholder alt"/>
 </div>
 :::info
-<div style={{color: "red", margin: 0, display: 'contents'}}>**1.**</div> Here you can select Collections to add as independent or dependent collections to the matching process. To do this, you can click on “Collections” to expand the section to see a list of all collections
+<div style={{color: "red", margin: 0, display: 'contents'}}>**1.**</div> Here you can select Collections to serve in the role of either anchored or responding collections in the matching process. To do this, you can click on “Collections” to expand the section to see a list of all collections. 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. You can also add custom sets, however, this is a more advanced topic which you can learn about here (link)
+You can also add custom sets. However, this is a more advanced topic which you can learn about [here](/usage/vocab/report_gen/custom_sets).
 
-<div style={{color: "red", margin: 0, display: 'contents'}}>**2.**</div>  Selected independent and dependent collections will appear here
+<div style={{color: "red", margin: 0, display: 'contents'}}>**2.**</div>  Selected anchored and responding collections will appear here
 
-<div style={{color: "red", margin: 0, display: 'contents'}}>**3.**</div> “Generate Matches” will create a report, matching elements in the independent collection to elements in the dependent collection
+<div style={{color: "red", margin: 0, display: 'contents'}}>**3.**</div> “Generate Matches” will create a report, matching elements in the responding collection to elements in the anchor collection
 
-<div style={{color: "red", margin: 0, display: 'contents'}}>**4.**</div>  “Clear” will deselect all independent and dependent collections
+<div style={{color: "red", margin: 0, display: 'contents'}}>**4.**</div>  “Clear” will deselect all collections selected to be anchored and responding.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Presently, it will do nothing as we haven’t selected anything
+Presently, it will do nothing as we haven’t selected anything
 
-<div style={{color: "red", margin: 0, display: 'contents'}}>**5.**</div>  You can adjust weights for the matching process and save them in profiles, which you can select using the dropdown. The “Match Profile” button will display information about your current profile and allow you to modify the weighting. 
+<div style={{color: "red", margin: 0, display: 'contents'}}>**5.**</div>  You can adjust weights for the matching process and save them in profiles, which you can select using the dropdown. The “Match Profile” button will display information about your current profile and allow you to modify the weighting.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. This is an advanced topic which can be learned about in more detail [here](/usage/vocab/report_gen/match_sets/weighting).
+This is an advanced topic which can be learned about in more detail [here](/usage/vocab/report_gen/match_sets/weighting).
 :::
 Click on “> Collections” to expand the Collections section and view the list of all collections.
 
@@ -70,17 +71,17 @@ Click on “> Collections” to expand the Collections section and view the list
 <img src={SearchStart?.src || SearchStart} width="80%" alt="Placeholder alt"/>
 </div>
 
-Now that you can see the list of all collections, go ahead and look for your own! In the “Enter Keyword…” field, type “Math Help” and press “+ Filter” to search for our collection.
+Now that you can see the list of all collections, go ahead and look for your own. In the “Enter Keyword…” field, type “Math Help” and press “+ Filter” to search for our collection.
 
 <div style={{textAlign: "center"}}>
 <img src={AddDependent?.src || AddDependent} width="80%" alt="Placeholder alt"/>
 </div>
 
-Since you want to use Math Help’s resources as a pool of knowledge for Malia, add it as a dependent collection by clicking the checkbox underneath "Dep" or Dependent.
+Since you want to use Math Help’s resources to support Malia, add it as a responding collection by clicking the checkbox underneath "Dep" or Dependent.
 <div style={{textAlign: "center"}}>
 <img src={DependentAdded?.src || DependentAdded} width="80%" alt="Placeholder alt"/>
 </div>
-Your collection has now been added! Let’s now add in Malia’s algebra 1 curriculum, which is an available and existing collection. 
+Your collection has now been added. Next, Malia's Algebra 1 curriculum, an available and existing collection.
 
 <div style={{textAlign: "center"}}>
 <img src={RemoveFilter?.src || RemoveFilter} width="80%" alt="Placeholder alt"/>
@@ -90,21 +91,21 @@ First, remove "Math Help" as a filter.
 <img src={SearchStart?.src || SearchStart} width="80%" alt="Placeholder alt"/>
 </div>
 
-Now, in the “Enter Keyword…” field, type in “Malia” and press “+ Filter”. This will now search for all collections with “Malia” or “Math Help” in their displayed information. 
+Now, in the “Enter Keyword…” field, type in “Malia” and press “+ Filter”. This will now search for all collections with “Malia” in their displayed information. 
 
 <div style={{textAlign: "center"}}>
 <img src={AddIndependent?.src || AddIndependent} width="80%" alt="Placeholder alt"/>
 </div>
 
-Click on the checkbox next to “Malia Algebra 1” that sits underneath "Ind" (independent) to add “Malia Algebra 1” as an independent collection–or as a search through the pool of Math Help knowledge.
+Click on the checkbox next to “Malia Algebra 1” that sits underneath "Ind" (independent) to add “Malia Algebra 1” as the anchored collection–or as a search through Math Help. 
 <div style={{textAlign: "center"}}>
 <img src={AllAdded?.src || AllAdded} width="80%" alt="Placeholder alt"/>
 </div>
-Great, we have our match fully prepared for Malia! We’ll look through your Algebra 1 curriculum and match it to Math Help’s Math resources to help them! Finally, Mrs. Math Help will no longer have to deal with Malia’s incessant spam mail begging for help. Click “Generate Matches” to create a report that provides the information that Malia needs.
+Great, our match is fully prepared for Malia. Based on Malia's Algebra 1 curriculum, we will now match to Math Help's Math resources to address Malia's needs. Finally, Mrs. Math Help will no longer have to deal with Malia's incessant spam mail begging for help. Click “Generate Matches” to create a report that provides the information for Malia. 
 <div style={{textAlign: "center"}}>
 <img src={ReportCollapsed?.src || ReportCollapsed} width="80%" alt="Placeholder alt"/>
 </div>
-Click on “> Collections” to expand to see all the independent collections we’ve added (in this case just one).
+Click on “> Collections” to expand to see all the independent collections we've added (in this case just one).
 <div style={{textAlign: "center"}}>
 <img src={CollectionCollapsed?.src || CollectionCollapsed} width="80%" alt="Placeholder alt"/>
 </div>
@@ -112,10 +113,12 @@ Now click on “Malia Algebra 1” to expand the collection and see its hierarch
 <div style={{textAlign: "center"}}>
 <img src={ReportExpanded?.src || ReportExpanded} width="80%" alt="Placeholder alt"/>
 </div>
-…wow Malia has a really simple Algebra curriculum, guess they were really struggling with quadratic equations. Regardless, let’s click on “Solving Quadratic Equations” to see what elements in Math Help match with it!
+WOW...Malia has a really simple Algebra curriculum. Now, click on “Solving Quadratic Equations” to see what elements in Math Help match with it.
 <div style={{textAlign: "center"}}>
 <img src={ReportMatches?.src || ReportMatches} width="80%" alt="Placeholder alt"/>
 </div>
-Finally an effective set of matches for Malia! Each matching element receives what is called a MatchIndex, a measure of how well it matches, and your matches are organized from greatest to least by their MatchIndex. "Factoring Quadratic Equations" sits at the top as the best match; this is intuitive, as that element is a direct method of Solving Quadratic Equations which often touches on fundamental properties of quadratic equations. Furthermore, the other two elements in Math Help sit a little lower as they don’t directly match the topic as well. Now, we can stand assured that Malia will get effective insight on what Math Help resources to access. You then integrate MatchMaker into the Math Help site, and let Malia know. Malia then comes into your office crying tears of joy from the deep understanding in Algebra 1 they’ve just received, and Mrs. Math Help is proud of her company’s work yet again.
+Finally, a list of learning resource matches that address Malia's needs. 
+
+When two elements match one another the ranking of the match is indicated by the MatchIndex. As with all indices there are no units associated with this number. It represents the relative strength of the match compared to other matches to the same element.  Matches in the MatchMaker interface are organized with the highest MatchIndex at the top of the list decreasing from there. In this example, “Completing the Square” sits at the top with the highest MatchIndex; this is intuitive, as that element is a direct explanation of a method of Solving Quadratic Equations. Furthermore, the other two elements in Math Help sit a little lower as they don't directly address the topic as well. Using the MatchIndex to rank responses increases the probability that Shmingus will see which Math Help element is most likely to be helpful. MatchMaker functionality can be easily into the Math Help site to make John Shmingus aware of this. 
 ## Conclusion
-You’ve just completed a rapid intro to MatchMaker, giving you the knowledge needed to create your own meaningful matches for whatever learning resources, curriculums or competency frameworks you have. For more in-depth information on MatchMaker, feel free to pursue the Functionality section, where every MatchMaker feature is covered in depth. Finally, thank you for choosing MatchMaker to supercharge your organization’s offerings to enable deeply effective and relevant insights. Liberate Learning!
+You've just completed a rapid introduction to MatchMaker, giving you the knowledge needed to create your own meaningful matches for whatever learning resources, curricula, competency frameworks or other collection types you have. For more in-depth information on MatchMaker, feel free to view the “Functionality” section, where every MatchMaker feature is covered in depth. 

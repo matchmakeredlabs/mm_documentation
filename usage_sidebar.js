@@ -51,7 +51,7 @@ const sidebars = {
             {
               type: "doc",
               id: "starting/collections/hierarchy",
-              label: "How to Build a Collection Hierarchy?",
+              label: "How to Build a Hierarchy?",
             },
             {
               type: "doc",
