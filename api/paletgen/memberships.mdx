@@ -1,0 +1,293 @@
+---
+title: PaletGen Memberships & Invitations
+slug: /paletgen/memberships
+---
+
+# PaletGen memberships and invitations
+
+Membership records represent pending invitations, accepted project members, and revoked access. The invitation lookup and sign-up acceptance routes are anonymous; all other routes require a bearer token.
+
+## Endpoint summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/paletgen/memberships` | List memberships for a project. |
+| GET | `/api/paletgen/memberships/{membershipId}` | Retrieve one membership. |
+| POST | `/api/paletgen/memberships` | Invite a user. |
+| PUT | `/api/paletgen/memberships/{membershipId}` | Revoke a membership. |
+| DELETE | `/api/paletgen/memberships/{membershipId}` | Delete a membership record. |
+| GET | `/api/paletgen/invitations/lookup` | Look up a pending invitation token. |
+| POST | `/api/paletgen/invitations/accept` | Accept while signed in. |
+| POST | `/api/paletgen/invitations/accept-signup` | Create an account and accept. |
+
+## GET - List memberships
+
+### Notes
+
+- `projectId` is required. Requires project read access.
+- Invitation tokens are never included in normal membership responses.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project whose memberships should be listed. |
+
+Path parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/memberships?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "membership-88",
+      "type": "project-membership",
+      "projectId": "project-123",
+      "inviteeEmail": "reviewer@example.com",
+      "inviteeUserId": "reviewer@example.com",
+      "status": "accepted",
+      "invitedByUserId": "owner@example.com",
+      "invitedOn": "2026-08-20T18:00:00Z",
+      "acceptedOn": "2026-08-20T18:10:00Z",
+      "_canUpdate": true
+    }
+  ]
+}
+```
+
+## GET - Membership by ID
+
+### Notes
+
+- Requires read access to the membership's project. The invitation token is removed from the response.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `membershipId` | string | Yes | Membership record ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/memberships/membership-88"
+```
+
+### Sample response
+
+```json
+{
+  "id": "membership-88",
+  "type": "project-membership",
+  "projectId": "project-123",
+  "inviteeEmail": "reviewer@example.com",
+  "status": "pending",
+  "invitedByUserId": "owner@example.com",
+  "invitedOn": "2026-08-20T18:00:00Z",
+  "_canUpdate": true
+}
+```
+
+## POST - Invite a project member
+
+### Notes
+
+- Requires project write access.
+- The invitee email is lowercased. Self-invitations and duplicate non-revoked invitations are rejected.
+- The API generates the membership ID and token, sets status `pending`, and queues the invitation email. Email delivery is best effort; a successful API response does not guarantee delivery.
+- The token is intentionally omitted from the response and is sent only in the invitation link.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | No | Membership ID; a GUID is generated when omitted. |
+| `projectId` | string | Yes | Project to invite the user to. |
+| `inviteeEmail` | string | Yes | Invitee email address. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  -d '{"projectId":"project-123","inviteeEmail":"reviewer@example.com"}' \
+  "https://matchmakeredlabs.net/api/paletgen/memberships"
+```
+
+### Sample response
+
+```json
+{
+  "id": "d80604d7-a608-49ea-a9da-d0b3149ba624",
+  "type": "project-membership",
+  "projectId": "project-123",
+  "inviteeEmail": "reviewer@example.com",
+  "status": "pending",
+  "invitedByUserId": "owner@example.com",
+  "invitedOn": "2026-08-20T18:00:00Z",
+  "modifiedOn": "2026-08-20T18:00:00Z",
+  "_canUpdate": true
+}
+```
+
+## PUT - Revoke a membership
+
+### Notes
+
+- The generic membership update is revoke-only. Accept invitations through an invitation endpoint.
+- All identity and invitation fields are preserved; the token is removed and status becomes `revoked`.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `membershipId` | string | Yes | Membership to revoke. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X PUT \
+  -d '{"id":"membership-88","status":"revoked"}' \
+  "https://matchmakeredlabs.net/api/paletgen/memberships/membership-88"
+```
+
+### Sample response
+
+```json
+{
+  "id": "membership-88",
+  "type": "project-membership",
+  "projectId": "project-123",
+  "inviteeEmail": "reviewer@example.com",
+  "inviteeUserId": "reviewer@example.com",
+  "status": "revoked",
+  "modifiedOn": "2026-08-20T19:00:00Z",
+  "_canUpdate": true
+}
+```
+
+## DELETE - Delete a membership
+
+### Notes
+
+- Requires project write access. Unlike revocation, deletion removes the membership record.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `membershipId` | string | Yes | Membership record ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/memberships/membership-88"
+```
+
+### Sample response
+
+```json
+{ "id": "membership-88" }
+```
+
+## GET - Look up invitation
+
+### Notes
+
+- Authentication is not required. The token itself is the credential, so clients should avoid logging or exposing it.
+- Only pending invitations are returned. The response tells the client whether to present sign-in or sign-up.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `token` | string | Yes | Token from the invitation URL. |
+
+Path parameters: none.
+
+```bash
+curl "https://matchmakeredlabs.net/api/paletgen/invitations/lookup?token=INVITATION_TOKEN"
+```
+
+### Sample response
+
+```json
+{
+  "inviteeEmail": "reviewer@example.com",
+  "projectName": "Grade 8 Science",
+  "projectId": "project-123",
+  "status": "pending",
+  "userExists": true
+}
+```
+
+## POST - Accept invitation while signed in
+
+### Notes
+
+- Requires authentication. The signed-in user's email must match the invitation email.
+- The invitation becomes unusable after acceptance because its token is removed.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `token` | string | Yes | Pending invitation token. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  -d '{"token":"INVITATION_TOKEN"}' \
+  "https://matchmakeredlabs.net/api/paletgen/invitations/accept"
+```
+
+### Sample response
+
+```json
+{ "projectId": "project-123", "status": "accepted" }
+```
+
+## POST - Sign up and accept invitation
+
+### Notes
+
+- Authentication is not required. Use this only when no account exists for the invited email; an existing account returns `409 Conflict`.
+- The password must contain at least six characters and may not begin or end with whitespace.
+- On success, the account and accepted membership are created and an authentication token is issued through the normal authentication response headers/cookie behavior.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `token` | string | Yes | Pending invitation token. |
+| `fullName` | string | Yes | New user's full name. |
+| `password` | string | Yes | New account password. |
+
+```bash
+curl -H "Content-Type: application/json" -X POST \
+  -d '{
+    "token":"INVITATION_TOKEN",
+    "fullName":"Alex Reviewer",
+    "password":"correct horse battery staple"
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/invitations/accept-signup"
+```
+
+### Sample response
+
+```json
+{ "projectId": "project-123", "status": "accepted" }
+```

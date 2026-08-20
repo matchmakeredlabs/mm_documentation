@@ -1,0 +1,312 @@
+---
+title: PaletGen Descriptors
+slug: /paletgen/descriptors
+---
+
+# PaletGen descriptors
+
+PaletGen descriptors are project-local copies of the reference collection's elements. They carry review state and associations to project or existing statements. All requests require a bearer token and project access.
+
+## Endpoint summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/paletgen/descriptors` | List project descriptors. |
+| GET | `/api/paletgen/descriptors/{descriptorId}` | Retrieve one project descriptor. |
+| POST | `/api/paletgen/descriptors` | Create a project descriptor. |
+| PUT | `/api/paletgen/descriptors/{descriptorId}` | Edit review state or statement associations. |
+| DELETE | `/api/paletgen/descriptors/{descriptorId}` | Delete a project descriptor. |
+| POST | `/api/paletgen/search/descriptors` | Vector-search project descriptors. |
+| GET | `/api/paletgen/collections` | Reconstruct a project collection. |
+
+## GET - List descriptors
+
+### Notes
+
+- Project members should supply `projectId`. Global `ReadDescriptor` administrators can query across projects.
+- Additional query fields are treated as exact database filters by the shared REST layer.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | For project members | Limit results to one project. |
+
+Path parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/descriptors?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "project-descriptor-22",
+      "type": "paletgenprojectdescriptor",
+      "projectId": "project-123",
+      "descriptor": {
+        "id": "reference-element-22",
+        "name": "Energy transfer",
+        "description": "Transfer of energy between interacting systems",
+        "isLeaf": true
+      },
+      "associatedStatements": [
+        { "id": "statement-101", "type": "project-statement" }
+      ],
+      "isReviewed": false,
+      "_canUpdate": true
+    }
+  ]
+}
+```
+
+## GET - Descriptor by ID
+
+### Notes
+
+- Requires read access to the descriptor's project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `descriptorId` | string | Yes | Project descriptor record ID, not the nested reference descriptor ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/descriptors/project-descriptor-22"
+```
+
+### Sample response
+
+```json
+{
+  "id": "project-descriptor-22",
+  "type": "paletgenprojectdescriptor",
+  "projectId": "project-123",
+  "descriptor": {
+    "id": "reference-element-22",
+    "name": "Energy transfer",
+    "isLeaf": true
+  },
+  "associatedStatements": [],
+  "isReviewed": false,
+  "_canUpdate": true
+}
+```
+
+## POST - Create descriptor
+
+### Notes
+
+- Requires project write access. Most project descriptors are created automatically when generation copies the reference collection.
+- The outer record owns project metadata; the original descriptor is nested in `descriptor`.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | Yes | Project descriptor record ID. |
+| `projectId` | string | Yes | Owning project ID. |
+| `descriptor` | object | Yes for useful records | Copied descriptor data. |
+| `associatedStatements` | object[] | No | `{id, type}` associations. |
+| `isReviewed` | boolean | No | Human-review flag. |
+| `embedding` | number[] | No | Search embedding, normally generated for leaf elements. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  -d '{
+    "id":"project-descriptor-22",
+    "projectId":"project-123",
+    "descriptor":{"id":"reference-element-22","name":"Energy transfer","isLeaf":true},
+    "associatedStatements":[],
+    "isReviewed":false
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/descriptors"
+```
+
+### Sample response
+
+```json
+{
+  "id": "project-descriptor-22",
+  "type": "paletgenprojectdescriptor",
+  "projectId": "project-123",
+  "descriptor": { "id": "reference-element-22", "name": "Energy transfer", "isLeaf": true },
+  "associatedStatements": [],
+  "isReviewed": false,
+  "_canUpdate": true
+}
+```
+
+## PUT - Update descriptor
+
+### Notes
+
+- Requires project write access. Send the complete record.
+- `projectId` and `createdOn` are preserved from the stored record.
+- Changing `isReviewed` records `reviewedOn`, `reviewedByUserId`, and an `elementHistory` event.
+- Adding or removing an association also appends an `elementHistory` event. Association `type` is normally `project-statement` or `existing-statement`.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `descriptorId` | string | Yes | Project descriptor record ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X PUT \
+  -d '{
+    "id":"project-descriptor-22",
+    "projectId":"project-123",
+    "descriptor":{"id":"reference-element-22","name":"Energy transfer","isLeaf":true},
+    "associatedStatements":[{"id":"statement-101","type":"project-statement"}],
+    "isReviewed":true
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/descriptors/project-descriptor-22"
+```
+
+### Sample response
+
+```json
+{
+  "id": "project-descriptor-22",
+  "type": "paletgenprojectdescriptor",
+  "projectId": "project-123",
+  "associatedStatements": [{ "id": "statement-101", "type": "project-statement" }],
+  "isReviewed": true,
+  "reviewedOn": "2026-08-20T17:00:00Z",
+  "reviewedByUserId": "reviewer@example.com",
+  "elementHistory": [
+    { "action": "reviewed", "changedOn": "2026-08-20T17:00:00Z", "changedByUserId": "reviewer@example.com" },
+    { "action": "association_added", "statementId": "statement-101", "statementType": "project-statement" }
+  ],
+  "_canUpdate": true
+}
+```
+
+## DELETE - Delete descriptor
+
+### Notes
+
+- Requires project write access. This does not delete the source descriptor in the reference collection.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `descriptorId` | string | Yes | Project descriptor record ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/descriptors/project-descriptor-22"
+```
+
+### Sample response
+
+```json
+{ "id": "project-descriptor-22" }
+```
+
+## POST - Search descriptors
+
+### Notes
+
+- Supply either `matchText` or a previously returned `generatedEmbedding`.
+- Only descriptors with an embedding can be returned. The endpoint returns up to 1,000 results for the offset.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Limit and authorize the search for one project. |
+
+Path parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `matchText` | string | Conditional | Text to embed. |
+| `generatedEmbedding` | number[] | Conditional | Reuse an existing query embedding. |
+| `offset` | integer | No | Search page offset. Default `0`. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  -d '{"matchText":"energy transfer","offset":0}' \
+  "https://matchmakeredlabs.net/api/paletgen/search/descriptors?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "generatedEmbedding": [0.012, -0.034, 0.056],
+  "descriptors": [
+    {
+      "id": "project-descriptor-22",
+      "projectId": "project-123",
+      "descriptor": { "name": "Energy transfer", "isLeaf": true },
+      "associatedStatements": [],
+      "_canUpdate": true
+    }
+  ],
+  "nextOffset": 1,
+  "count": 1
+}
+```
+
+## GET - Reconstruct project collection
+
+### Notes
+
+- Returns the copied descriptors in the collection-oriented format used by the rest of MatchMaker.
+- At present this reconstructs the project's reference collection; additional collection types are not selected separately.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project whose copied collection should be returned. |
+
+Path parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/collections?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "collection": [
+    {
+      "id": "reference-root",
+      "name": "Grade 8 Science",
+      "mainEntityId": "reference-root",
+      "isLeaf": false
+    },
+    {
+      "id": "reference-element-22",
+      "name": "Energy transfer",
+      "mainEntityId": "reference-root",
+      "isPartOfId": "reference-root",
+      "isLeaf": true
+    }
+  ]
+}
+```

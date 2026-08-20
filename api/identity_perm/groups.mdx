@@ -2,591 +2,545 @@
 title: /groups
 slug: /groups
 ---
-    
+
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 # /groups
 
-This endpoint provides access to group management operations including creating, reading, updating, and deleting groups.
+The groups API manages reusable sets of users and nested groups. Every group is owned by exactly one project or one customer.
+
+All requests require an authenticated bearer token. The owner-scoped routes below are preferred because the route identifies both the owner type and owner ID:
+
+```text
+/api/groups/{ownerType}/{ownerId}
+```
+
+`ownerType` must be `projects` or `customers`.
+
+| Owner type | Stored owner property | Read privilege | Create, update, and delete privilege |
+|------------|-----------------------|----------------|--------------------------------------|
+| `projects` | `project` | `ReadGroup` on the project | `WriteGroup` on the project |
+| `customers` | `customerId` | `ReadCustomer` on the customer | `WriteCustomer` on the customer |
+
+The same operations are also available through `/api/projects/{projectId}/groups` and `/api/customers/{customerId}/groups`. The unscoped `/api/groups` route remains available for compatibility, but requests using it must supply exactly one owner property in the body.
 
 ## Table of Contents
 
 | Endpoint | Description |
 |----------|-------------|
-| [GET - All Groups](#get---all-groups) | Retrieve all user groups |
-| [GET - Group by ID](#get---group-by-id) | Retrieve a specific group by its ID. |
-| [POST - Create Group](#post---create-group) | Create a new user group. |
-| [PUT - Update Group](#put---update-group) | Update a preexisting group by its ID. |
-| [DELETE](#delete---remove-group) | Delete a specific group by its ID. |
+| [GET - Groups by Owner](#get---groups-by-owner) | List the groups owned by one project or customer. |
+| [GET - Group by ID](#get---group-by-id) | Retrieve one group within its owner context. |
+| [POST - Create Group](#post---create-group) | Create a project-owned or customer-owned group. |
+| [PUT - Update Group](#put---update-group) | Update an existing group's description or members. |
+| [DELETE - Remove Group](#delete---remove-group) | Delete a group and remove its role and group memberships. |
 
-## GET - All Groups
+## GET - Groups by Owner
 
 ### Endpoint
-```
-GET https://matchmakeredlabs.net/api/groups
+
+```text
+GET https://matchmakeredlabs.net/api/groups/{ownerType}/{ownerId}
 ```
 
-**Notes:**
-- Returns all groups if caller has system-wide admin `ReadGroup` privilege
----
+### Notes
+
+For `projects`, the caller needs `ReadGroup` on the project. For `customers`, the caller needs `ReadCustomer` on the customer. The response is an object containing an `items` array.
+
+Each returned group includes `ownerType` and its normalized owner property (`project` or `customerId`). It also includes these computed properties:
+
+- `_canUpdate`: whether the caller may update or delete the group.
+- `_groups`: groups containing this group as a member.
+- `_roles`: project roles assigned to this group.
+- `_customerRoles`: customer roles assigned to this group.
 
 ### Request
 
 #### Query Parameters
 
-None required.
-
-#### Sample Request
-
-<Tabs
-  groupId="get_all_groups"
-  defaultValue="curl"
-  values={[
-    { label: 'cURL', value: 'curl' },
-    { label: 'JavaScript', value: 'js' },
-    { label: 'Python', value: 'python' },
-  ]}
->
-
-<TabItem value="curl">
-```curl
-curl \
--H "Authorization: Bearer $TOKEN" \
--X GET "https://matchmakeredlabs.net/api/groups"
-```
-</TabItem>
-
-<TabItem value="js">
-```js
-async function getGroups() {
-    const response = await fetch("https://matchmakeredlabs.net/api/groups", {
-        method: "GET",
-        headers: {
-            'Authorization': `Bearer ${TOKEN}`
-        }
-    });
-    return response.json();
-}
-
-getGroups().then(data => console.log(data));
-```
-</TabItem>
-
-<TabItem value="python">
-```python
-import requests
-
-token = "<your_token>"
-url = 'https://matchmakeredlabs.net/api/groups'
-headers = {
-    'Authorization': f"Bearer {token}"
-}
-
-response = requests.get(url, headers=headers)
-print(response.json())
-```
-</TabItem>
-</Tabs>
-
-### Response
-
-#### Response Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Group identifier (format: `{org}:{name}`) |
-| `type` | string | Always "group" |
-| `name` | string | Group name |
-| `org` | string | Organization ID that owns this group |
-| `description` | string | Group description |
-| `members` | array | Array of user/group IDs |
-| `_groups` | array | Groups this group belongs to |
-| `_roles` | array | Roles in different organizations |
-
-#### Example Response
-```json
-[
-    {
-        "id": "org1:developers",
-        "type": "group",
-        "name": "developers",
-        "org": "org1",
-        "description": "Development team",
-        "members": [
-            "user123",
-            "user456",
-            "user789"
-        ],
-        "_groups": [],
-        "_roles": []
-    },
-    {
-        "id": "org2:developers",
-        "type": "group",
-        "name": "developers",
-        "org": "org2",
-        "description": "Development team",
-        "members": [
-            "user321",
-            "user654",
-            "user987"
-        ],
-        "_groups": [],
-        "_roles": []
-    },
-]
-```
-
-## GET - Group by ID
-
-### Endpoint
-```
-GET https://matchmakeredlabs.net/api/groups/{groupId}
-```
-
-**Notes:**
-- Requires `ReadGroup` permission on the specified group
-- Group must exist
-- Members must be either users or groups (organizations cannot be members)
-- All specified members must exist
-
----
-
-### Request
+Optional query parameters perform exact property matches within the selected owner. For example, `?name=Reviewers` filters by group name.
 
 #### Path Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `groupId` | string | Yes | Group identifier |
+| `ownerType` | string | Yes | `projects` or `customers`. |
+| `ownerId` | string | Yes | ID of the project or customer that owns the groups. |
 
 #### Sample Request
 
-<Tabs
-  groupId="get_group_by_id"
-  defaultValue="curl"
-  values={[
-    { label: 'cURL', value: 'curl' },
-    { label: 'JavaScript', value: 'js' },
-    { label: 'Python', value: 'python' },
-  ]}
->
-
+<Tabs groupId="get_groups_by_owner" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
 <TabItem value="curl">
 ```curl
 curl \
 -H "Authorization: Bearer $TOKEN" \
--X GET "https://matchmakeredlabs.net/api/group/group123"
+-X GET "https://matchmakeredlabs.net/api/groups/projects/curriculumteam"
 ```
 </TabItem>
-
 <TabItem value="js">
 ```js
-async function getGroup(groupId) {
-    const response = await fetch(`https://matchmakeredlabs.net/api/groups/${groupId}`, {
-        method: "GET",
-        headers: {
-            'Authorization': `Bearer ${TOKEN}`
-        }
-    });
-    return response.json();
-}
-
-getGroup("group123").then(data => console.log(data));
+const ownerType = "projects";
+const ownerId = "curriculumteam";
+const response = await fetch(
+    `https://matchmakeredlabs.net/api/groups/${ownerType}/${ownerId}`,
+    { headers: { Authorization: `Bearer ${TOKEN}` } }
+);
+const groups = await response.json();
 ```
 </TabItem>
-
 <TabItem value="python">
 ```python
 import requests
 
-token = "<your_token>"
-groupId = "group123"
-url = f'https://matchmakeredlabs.net/api/groups/{group_id}'
-headers = {
-    'Authorization': f"Bearer {token}"
-}
-
-response = requests.get(url, headers=headers)
-print(response.json())
+owner_type = "projects"
+owner_id = "curriculumteam"
+response = requests.get(
+    f"https://matchmakeredlabs.net/api/groups/{owner_type}/{owner_id}",
+    headers={"Authorization": f"Bearer {token}"}
+)
+groups = response.json()
 ```
 </TabItem>
 </Tabs>
 
-### Response
+### Sample Response
 
-#### Response Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Group identifier (format: `{org}:{name}`) |
-| `type` | string | Always "group" |
-| `name` | string | Group name |
-| `org` | string | Organization ID that owns this group |
-| `description` | string | Group description |
-| `members` | array | Array of user/group IDs |
-| `_groups` | array | Groups this group belongs to |
-| `_roles` | array | Roles in different organizations |
-
-#### Example Response
 ```json
 {
-    "id": "org1:developers",
+    "items": [
+        {
+            "id": "curriculumteam:reviewers",
+            "type": "group",
+            "name": "Reviewers",
+            "description": "Curriculum review team",
+            "members": [
+                "user@example.com",
+                "customer-123:subjectexperts"
+            ],
+            "project": "curriculumteam",
+            "ownerType": "project",
+            "_canUpdate": true,
+            "_groups": [],
+            "_roles": [],
+            "_customerRoles": []
+        }
+    ]
+}
+```
+
+For a customer-owned group, the corresponding response contains `"customerId": "customer-123"` and `"ownerType": "customer"` instead of `project`.
+
+## GET - Group by ID
+
+### Endpoint
+
+```text
+GET https://matchmakeredlabs.net/api/groups/{ownerType}/{ownerId}/{groupId}
+```
+
+### Notes
+
+The group must belong to the owner specified in the route. A mismatched owner context is rejected even if the caller can access both owners.
+
+Project-owned groups require `ReadGroup` on the project. Customer-owned groups require `ReadCustomer` on the customer.
+
+### Request
+
+#### Query Parameters
+
+None.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `ownerType` | string | Yes | `projects` or `customers`. |
+| `ownerId` | string | Yes | Owning project or customer ID. |
+| `groupId` | string | Yes | Full group ID in the form `{ownerId}:{lowercaseName}`. |
+
+#### Sample Request
+
+<Tabs groupId="get_group_by_id" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/groups/customers/customer-123/customer-123:subjectexperts"
+```
+</TabItem>
+<TabItem value="js">
+```js
+const ownerId = "customer-123";
+const groupId = "customer-123:subjectexperts";
+const response = await fetch(
+    `https://matchmakeredlabs.net/api/groups/customers/${ownerId}/${groupId}`,
+    { headers: { Authorization: `Bearer ${TOKEN}` } }
+);
+const group = await response.json();
+```
+</TabItem>
+<TabItem value="python">
+```python
+import requests
+
+owner_id = "customer-123"
+group_id = "customer-123:subjectexperts"
+response = requests.get(
+    f"https://matchmakeredlabs.net/api/groups/customers/{owner_id}/{group_id}",
+    headers={"Authorization": f"Bearer {token}"}
+)
+group = response.json()
+```
+</TabItem>
+</Tabs>
+
+### Sample Response
+
+```json
+{
+    "id": "customer-123:subjectexperts",
     "type": "group",
-    "name": "developers",
-    "org": "org1",
-    "description": "Development team",
+    "name": "SubjectExperts",
+    "description": "Subject-matter experts across projects",
     "members": [
-        "user123",
-        "user456",
-        "user789"
+        "expert@example.com"
     ],
-    "_groups": [],
-    "_roles": []
+    "customerId": "customer-123",
+    "ownerType": "customer",
+    "_canUpdate": true,
+    "_groups": [
+        "curriculumteam:reviewers"
+    ],
+    "_roles": [],
+    "_customerRoles": [
+        {
+            "customerId": "customer-123",
+            "role": "editor"
+        }
+    ]
 }
 ```
 
 ## POST - Create Group
 
 ### Endpoint
-```
-POST https://matchmakeredlabs.net/api/groups
+
+```text
+POST https://matchmakeredlabs.net/api/groups/{ownerType}/{ownerId}
 ```
 
-**Notes:**
-- Requires `WriteGroup` permission on the specified organization
-- Group ID will be automatically generated as `{org}:{name}`
-- Organization must exist
-- Members must be either users or groups (organizations cannot be members)
-- All specified members must exist
+### Notes
 
----
+For a project-owned group, the caller needs `WriteGroup` on the project. For a customer-owned group, the caller needs `WriteCustomer` on the customer.
+
+The route supplies ownership, so omit `project` and `customerId` from the request body. The server derives the group ID as `{ownerId}:{lowercaseName}`. A group name may contain letters, digits, and underscores, but not spaces.
+
+`members` is required and contains user or group IDs. Every member must exist and must be a user or group. Nested groups are supported. Membership changes that would exceed an affected customer's permission-user limit or a project's `usersPerProject` limit are rejected.
 
 ### Request
 
+#### Query Parameters
+
+None.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `ownerType` | string | Yes | `projects` or `customers`. |
+| `ownerId` | string | Yes | Project or customer that will own the group. |
+
 #### Request Body
+
 ```json
 {
-    "name": "developers",
-    "org": "org1",
-    "description": "Development team",
+    "name": "Reviewers",
+    "description": "Curriculum review team",
     "members": [
-        "user123",
-        "user456"
+        "user@example.com",
+        "customer-123:subjectexperts"
     ]
 }
 ```
 
-#### Request Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | string | Yes | Group name (will be combined with org for ID) |
-| `org` | string | Yes | Organization ID that will own this group |
-| `description` | string | No | Group description |
-| `members` | array | Yes | Array of user/group IDs |
-
 #### Sample Request
 
-<Tabs
-  groupId="create_group"
-  defaultValue="curl"
-  values={[
-    { label: 'cURL', value: 'curl' },
-    { label: 'JavaScript', value: 'js' },
-    { label: 'Python', value: 'python' },
-  ]}
->
-
+<Tabs groupId="create_group" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
 <TabItem value="curl">
 ```curl
 curl \
 -H "Authorization: Bearer $TOKEN" \
 -H "Content-Type: application/json" \
--d '{"name":"developers","org":"org1","description":"Development team","members":["user123","user456"]}' \
--X POST "https://matchmakeredlabs.net/api/groups"
+-X POST "https://matchmakeredlabs.net/api/groups/projects/curriculumteam" \
+--data '{
+  "name": "Reviewers",
+  "description": "Curriculum review team",
+  "members": ["user@example.com", "customer-123:subjectexperts"]
+}'
 ```
 </TabItem>
-
 <TabItem value="js">
 ```js
-async function createGroup() {
-    const response = await fetch("https://matchmakeredlabs.net/api/groups", {
+const response = await fetch(
+    "https://matchmakeredlabs.net/api/groups/projects/curriculumteam",
+    {
         method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TOKEN}`
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            name: "developers",
-            org: "org1",
-            description: "Development team",
-            members: ["user123", "user456"]
+            name: "Reviewers",
+            description: "Curriculum review team",
+            members: ["user@example.com", "customer-123:subjectexperts"]
         })
-    });
-    return response.json();
-}
-
-createGroup().then(data => console.log(data));
+    }
+);
+const createdGroup = await response.json();
 ```
 </TabItem>
-
 <TabItem value="python">
 ```python
 import requests
 
-token = "<your_token>"
-url = 'https://matchmakeredlabs.net/api/groups'
-headers = {
-    'Content-Type': 'application/json',
-    'Authorization': f"Bearer {token}"
+group = {
+    "name": "Reviewers",
+    "description": "Curriculum review team",
+    "members": ["user@example.com", "customer-123:subjectexperts"]
 }
-data = {
-    "name": "developers",
-    "org": "org1",
-    "description": "Development team",
-    "members": ["user123", "user456"]
-}
-
-response = requests.post(url, json=data, headers=headers)
-print(response.json())
+response = requests.post(
+    "https://matchmakeredlabs.net/api/groups/projects/curriculumteam",
+    json=group,
+    headers={"Authorization": f"Bearer {token}"}
+)
+created_group = response.json()
 ```
 </TabItem>
 </Tabs>
 
-### Response
+### Sample Response
 
-#### Response Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Group identifier (format: `{org}:{name}`) |
-
-#### Example Response
 ```json
 {
-    "id": "org1:developers"
+    "id": "curriculumteam:reviewers",
+    "type": "group",
+    "name": "Reviewers",
+    "description": "Curriculum review team",
+    "members": [
+        "user@example.com",
+        "customer-123:subjectexperts"
+    ],
+    "project": "curriculumteam",
+    "ownerType": "project",
+    "_canUpdate": true,
+    "_groups": [],
+    "_roles": [],
+    "_customerRoles": []
 }
 ```
 
 ## PUT - Update Group
 
 ### Endpoint
-```
-PUT https://matchmakeredlabs.net/api/groups/{groupId}
+
+```text
+PUT https://matchmakeredlabs.net/api/groups/{ownerType}/{ownerId}/{groupId}
 ```
 
-**Notes:**
-- Requires `WriteGroup` permission on the group's organization
-- Cannot change the organization owner
-- All specified members must exist
-- Members must be either users or groups (organizations cannot be members)
+### Notes
 
----
+The group must belong to the owner in the route. Project-owned groups require `WriteGroup` on the project; customer-owned groups require `WriteCustomer` on the customer.
+
+The group owner and name cannot change. PUT replaces the writable group representation, so include `name`, `description`, and the complete `members` array. Ownership fields and computed properties may be omitted because the route supplies ownership and the server recomputes read-only properties.
 
 ### Request
+
+#### Query Parameters
+
+None.
 
 #### Path Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `groupId` | string | Yes | Group identifier (format: `{org}:{name}`) |
+| `ownerType` | string | Yes | `projects` or `customers`. |
+| `ownerId` | string | Yes | Owning project or customer ID. |
+| `groupId` | string | Yes | Full group ID in the form `{ownerId}:{lowercaseName}`. |
 
 #### Request Body
+
 ```json
 {
-    "name": "developers",
-    "org": "org1",
-    "description": "Updated development team",
+    "name": "Reviewers",
+    "description": "Updated curriculum review team",
     "members": [
-        "user123",
-        "user456",
-        "user789"
+        "user@example.com",
+        "second.reviewer@example.com"
     ]
 }
 ```
 
-#### Request Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | string | Yes | Group name (must match existing name) |
-| `org` | string | Yes | Organization ID (must match existing org) |
-| `description` | string | No | Group description |
-| `members` | array | Yes | Array of user/group IDs |
-
 #### Sample Request
 
-<Tabs
-  groupId="update_group"
-  defaultValue="curl"
-  values={[
-    { label: 'cURL', value: 'curl' },
-    { label: 'JavaScript', value: 'js' },
-    { label: 'Python', value: 'python' },
-  ]}
->
-
+<Tabs groupId="update_group" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
 <TabItem value="curl">
 ```curl
 curl \
 -H "Authorization: Bearer $TOKEN" \
 -H "Content-Type: application/json" \
--d '{"name":"developers","org":"org1","description":"Updated development team","members":["user123","user456","user789"]}' \
--X PUT "https://matchmakeredlabs.net/api/groups/org1:developers"
+-X PUT "https://matchmakeredlabs.net/api/groups/projects/curriculumteam/curriculumteam:reviewers" \
+--data @group.json
 ```
 </TabItem>
-
 <TabItem value="js">
 ```js
-async function updateGroup(groupId) {
-    const response = await fetch(`https://matchmakeredlabs.net/api/groups/${groupId}`, {
+const response = await fetch(
+    "https://matchmakeredlabs.net/api/groups/projects/curriculumteam/curriculumteam:reviewers",
+    {
         method: "PUT",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TOKEN}`
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            name: "developers",
-            org: "org1",
-            description: "Updated development team",
-            members: ["user123", "user456", "user789"]
-        })
-    });
-    return response.json();
-}
-
-updateGroup("org1:developers").then(data => console.log(data));
+        body: JSON.stringify(group)
+    }
+);
+const updatedGroup = await response.json();
 ```
 </TabItem>
-
 <TabItem value="python">
 ```python
 import requests
 
-token = "<your_token>"
-group_id = "org1:developers"
-url = f'https://matchmakeredlabs.net/api/groups/{group_id}'
-headers = {
-    'Content-Type': 'application/json',
-    'Authorization': f"Bearer {token}"
-}
-data = {
-    "name": "developers",
-    "org": "org1",
-    "description": "Updated development team",
-    "members": ["user123", "user456", "user789"]
-}
-
-response = requests.put(url, json=data, headers=headers)
-print(response.json())
+response = requests.put(
+    "https://matchmakeredlabs.net/api/groups/projects/curriculumteam/curriculumteam:reviewers",
+    json=group,
+    headers={"Authorization": f"Bearer {token}"}
+)
+updated_group = response.json()
 ```
 </TabItem>
 </Tabs>
 
-### Response
+### Sample Response
 
-#### Response Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Group identifier (format: `{org}:{name}`) |
-
-#### Example Response
 ```json
 {
-    "id": "org1:developers"
+    "id": "curriculumteam:reviewers",
+    "type": "group",
+    "name": "Reviewers",
+    "description": "Updated curriculum review team",
+    "members": [
+        "user@example.com",
+        "second.reviewer@example.com"
+    ],
+    "project": "curriculumteam",
+    "ownerType": "project",
+    "_canUpdate": true,
+    "_groups": [],
+    "_roles": [],
+    "_customerRoles": []
 }
 ```
 
 ## DELETE - Remove Group
 
 ### Endpoint
-```
-DELETE https://matchmakeredlabs.net/api/groups/{groupId}
+
+```text
+DELETE https://matchmakeredlabs.net/api/groups/{ownerType}/{ownerId}/{groupId}
 ```
 
-**Notes:**
-- Requires `WriteGroup` permission on the group's organization
-- Group will be removed from any other groups it belongs to
-- Group will be removed from any organization roles
-- This action cannot be undone
+### Notes
 
----
+The group must belong to the owner specified in the route. Project-owned groups require `WriteGroup` on the project; customer-owned groups require `WriteCustomer` on the customer.
+
+Deleting a group also removes that group from other groups and from project and customer role assignments. It does not delete the group's users or nested groups.
 
 ### Request
+
+#### Query Parameters
+
+None.
 
 #### Path Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `groupId` | string | Yes | Group identifier (format: `{org}:{name}`) |
+| `ownerType` | string | Yes | `projects` or `customers`. |
+| `ownerId` | string | Yes | Owning project or customer ID. |
+| `groupId` | string | Yes | Full group ID in the form `{ownerId}:{lowercaseName}`. |
 
 #### Sample Request
 
-<Tabs
-  groupId="delete_group"
-  defaultValue="curl"
-  values={[
-    { label: 'cURL', value: 'curl' },
-    { label: 'JavaScript', value: 'js' },
-    { label: 'Python', value: 'python' },
-  ]}
->
-
+<Tabs groupId="delete_group" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
 <TabItem value="curl">
 ```curl
 curl \
 -H "Authorization: Bearer $TOKEN" \
--X DELETE "https://matchmakeredlabs.net/api/groups/org1:developers"
+-X DELETE "https://matchmakeredlabs.net/api/groups/customers/customer-123/customer-123:subjectexperts"
 ```
 </TabItem>
-
 <TabItem value="js">
 ```js
-async function deleteGroup(groupId) {
-    const response = await fetch(`https://matchmakeredlabs.net/api/groups/${groupId}`, {
+const response = await fetch(
+    "https://matchmakeredlabs.net/api/groups/customers/customer-123/customer-123:subjectexperts",
+    {
         method: "DELETE",
-        headers: {
-            'Authorization': `Bearer ${TOKEN}`
-        }
-    });
-    return response.json()
-}
-
-deleteGroup("org1:developers").then(success => console.log(success));
+        headers: { Authorization: `Bearer ${TOKEN}` }
+    }
+);
+const result = await response.json();
 ```
 </TabItem>
-
 <TabItem value="python">
 ```python
 import requests
 
-token = "<your_token>"
-group_id = "org1:developers"
-url = f'https://matchmakeredlabs.net/api/groups/{group_id}'
-headers = {
-    'Authorization': f"Bearer {token}"
-}
-
-response = requests.delete(url, headers=headers)
-print(response.json())
+response = requests.delete(
+    "https://matchmakeredlabs.net/api/groups/customers/customer-123/customer-123:subjectexperts",
+    headers={"Authorization": f"Bearer {token}"}
+)
+result = response.json()
 ```
 </TabItem>
 </Tabs>
 
-### Response
+### Sample Response
 
-#### Response Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Group identifier (format: `{org}:{name}`) |
-
-#### Example Response
 ```json
 {
-    "id": "org1:developers"
+    "id": "customer-123:subjectexperts"
 }
 ```
+
+## Common Status Codes
+
+| Status | Meaning |
+|--------|---------|
+| `200 OK` | The operation succeeded. |
+| `400 Bad Request` | The route, owner context, group ID, or request body is invalid. |
+| `401 Unauthorized` | Authentication is missing or invalid. |
+| `403 Forbidden` | The caller lacks the owner-specific privilege. |
+| `404 Not Found` | The requested group or owner does not exist. |
+| `409 Conflict` | A group with the derived ID already exists. |

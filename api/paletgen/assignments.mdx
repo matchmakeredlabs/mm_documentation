@@ -1,0 +1,218 @@
+---
+title: PaletGen Assignments
+slug: /paletgen/assignments
+---
+
+# PaletGen assignments
+
+Assignments distribute project items to reviewers for workflow step `1` or `2`. All requests require a bearer token and project access.
+
+## Endpoint summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/paletgen/assignments` | List or filter assignments for a project. |
+| GET | `/api/paletgen/assignments/{assignmentId}` | Retrieve one assignment. |
+| POST | `/api/paletgen/assignments` | Create an assignment. |
+| PUT | `/api/paletgen/assignments/{assignmentId}` | Update its name or item list. |
+| DELETE | `/api/paletgen/assignments/{assignmentId}` | Delete an assignment. |
+
+## GET - List assignments
+
+### Notes
+
+- `projectId` is required, including for global administrators.
+- A workflow-step filter is optional.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+| `workflowStep` | integer | No | Filter to step `1` or `2`. |
+
+Path parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/assignments?projectId=project-123&workflowStep=1"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "assignment-55",
+      "type": "project-assignment",
+      "projectId": "project-123",
+      "workflowStep": 1,
+      "assigneeUserId": "reviewer@example.com",
+      "assigneeName": "Alex Reviewer",
+      "itemIds": ["project-descriptor-22", "project-descriptor-23"],
+      "createdOn": "2026-08-20T18:00:00Z",
+      "modifiedOn": "2026-08-20T18:00:00Z",
+      "_canUpdate": true
+    }
+  ]
+}
+```
+
+## GET - Assignment by ID
+
+### Notes
+
+- Requires read access to the assignment's project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `assignmentId` | string | Yes | Assignment ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/assignments/assignment-55"
+```
+
+### Sample response
+
+```json
+{
+  "id": "assignment-55",
+  "type": "project-assignment",
+  "projectId": "project-123",
+  "workflowStep": 1,
+  "assigneeUserId": "reviewer@example.com",
+  "assigneeName": "Alex Reviewer",
+  "itemIds": ["project-descriptor-22", "project-descriptor-23"],
+  "_canUpdate": true
+}
+```
+
+## POST - Create assignment
+
+### Notes
+
+- Requires project write access.
+- The API generates a GUID when `id` is omitted and uses `assigneeUserId` as `assigneeName` when the latter is omitted.
+- Within the same project and workflow step, one assignee may have only one assignment and an item may appear in only one assignment.
+- Creating an assignment queues a best-effort email notification.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | No | Assignment ID. |
+| `projectId` | string | Yes | Owning project. |
+| `workflowStep` | integer | Yes | `1` or `2`. |
+| `assigneeUserId` | string | Yes | Reviewer user ID, normally their email. |
+| `assigneeName` | string | No | Reviewer display name. |
+| `itemIds` | string[] | Yes | Non-empty list of assigned descriptor or statement IDs. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  -d '{
+    "projectId":"project-123",
+    "workflowStep":1,
+    "assigneeUserId":"reviewer@example.com",
+    "assigneeName":"Alex Reviewer",
+    "itemIds":["project-descriptor-22","project-descriptor-23"]
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/assignments"
+```
+
+### Sample response
+
+```json
+{
+  "id": "19ed5819-e050-4de7-a1b9-a84f9e774f38",
+  "type": "project-assignment",
+  "projectId": "project-123",
+  "workflowStep": 1,
+  "assigneeUserId": "reviewer@example.com",
+  "assigneeName": "Alex Reviewer",
+  "itemIds": ["project-descriptor-22", "project-descriptor-23"],
+  "createdByUserId": "admin@example.com",
+  "createdOn": "2026-08-20T18:00:00Z",
+  "modifiedOn": "2026-08-20T18:00:00Z",
+  "_canUpdate": true
+}
+```
+
+## PUT - Update assignment
+
+### Notes
+
+- Send the complete record.
+- `projectId`, `assigneeUserId`, and `workflowStep` cannot change. `assigneeName` and `itemIds` may change subject to the uniqueness and overlap rules.
+- An update queues an email only when it adds one or more item IDs.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `assignmentId` | string | Yes | Assignment ID; it must match the body `id`. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X PUT \
+  -d '{
+    "id":"assignment-55",
+    "projectId":"project-123",
+    "workflowStep":1,
+    "assigneeUserId":"reviewer@example.com",
+    "assigneeName":"Alex Reviewer",
+    "itemIds":["project-descriptor-22","project-descriptor-23","project-descriptor-24"]
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/assignments/assignment-55"
+```
+
+### Sample response
+
+```json
+{
+  "id": "assignment-55",
+  "type": "project-assignment",
+  "projectId": "project-123",
+  "workflowStep": 1,
+  "assigneeUserId": "reviewer@example.com",
+  "assigneeName": "Alex Reviewer",
+  "itemIds": ["project-descriptor-22", "project-descriptor-23", "project-descriptor-24"],
+  "modifiedOn": "2026-08-20T18:30:00Z",
+  "_canUpdate": true
+}
+```
+
+## DELETE - Delete assignment
+
+### Notes
+
+- Requires project write access.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `assignmentId` | string | Yes | Assignment ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/assignments/assignment-55"
+```
+
+### Sample response
+
+```json
+{ "id": "assignment-55" }
+```

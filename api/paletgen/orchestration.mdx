@@ -1,0 +1,199 @@
+---
+title: PaletGen Orchestration
+slug: /paletgen/orchestration
+---
+
+# PaletGen orchestration
+
+These administrative endpoints start and monitor the Durable Functions job that generates a project's statements. Unlike project CRUD, accepted project membership alone is not sufficient: status and list require global `ReadDescriptor`, while start, cancel, and purge require global `WriteDescriptor`.
+
+## Endpoint summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/paletgen/orchestration/start` | Start a generation job. |
+| GET | `/api/paletgen/orchestration/status/{projectId}` | Poll one job's status. |
+| POST | `/api/paletgen/orchestration/cancel/{projectId}` | Terminate a running job. |
+| DELETE | `/api/paletgen/orchestration/purge/{projectId}` | Delete completed orchestration history. |
+| GET | `/api/paletgen/orchestration/list` | List PaletGen jobs. |
+
+## POST - Start generation
+
+### Notes
+
+- Creating a project already starts its initial generation job. Use this route when explicitly starting or restarting orchestration for an existing project.
+- There can be only one `Running` or `Pending` job per project. The instance ID is always `paletgen-{projectId}`.
+- Prompt bindings are read from the project record. The reference collection ID and similarity threshold come from this request.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Existing PaletGen project ID. |
+| `referenceCollectionId` | string | Yes | Collection to process. |
+| `similarityThreshold` | number | No | Similarity threshold; default `0.85`. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  -d '{
+    "projectId":"project-123",
+    "referenceCollectionId":"collection-456",
+    "similarityThreshold":0.85
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/orchestration/start"
+```
+
+### Sample response
+
+```json
+{
+  "instanceId": "paletgen-project-123",
+  "projectId": "project-123",
+  "statusUrl": "/api/paletgen/orchestration/status/project-123",
+  "message": "Generation started successfully"
+}
+```
+
+## GET - Generation status
+
+### Notes
+
+- Designed for polling. `isRunning` covers `Running` and `Pending`; `isComplete` covers `Completed`, `Failed`, and `Terminated`.
+- `customStatus` contains live progress. `output` is populated only after successful completion.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project whose orchestration should be queried. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/orchestration/status/project-123"
+```
+
+### Sample response
+
+```json
+{
+  "instanceId": "paletgen-project-123",
+  "projectId": "project-123",
+  "runtimeStatus": "Running",
+  "createdTime": "2026-08-20T14:15:00Z",
+  "lastUpdatedTime": "2026-08-20T14:16:10Z",
+  "customStatus": {
+    "phase": "GeneratingStatements",
+    "subStatus": "Processing leaf elements",
+    "totalLeafElements": 42,
+    "processedLeafElements": 12,
+    "totalStatementsGenerated": 37,
+    "totalTokensUsed": {
+      "inputTokens": 12000,
+      "outputTokens": 3100,
+      "cacheCreationTokens": 0,
+      "cacheReadTokens": 0
+    }
+  },
+  "isRunning": true,
+  "isComplete": false,
+  "output": null
+}
+```
+
+## POST - Cancel generation
+
+### Notes
+
+- Only a `Running` or `Pending` job can be cancelled. The project data already written by completed activities is not removed.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project whose job should be terminated. |
+
+Query parameters and request body: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X POST \
+  "https://matchmakeredlabs.net/api/paletgen/orchestration/cancel/project-123"
+```
+
+### Sample response
+
+```json
+{
+  "instanceId": "paletgen-project-123",
+  "projectId": "project-123",
+  "message": "Generation job cancelled"
+}
+```
+
+## DELETE - Purge orchestration history
+
+### Notes
+
+- Purges Durable Functions history, not the PaletGen project or generated data.
+- A running or pending job must be cancelled before it can be purged.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project whose orchestration history should be purged. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/orchestration/purge/project-123"
+```
+
+### Sample response
+
+```json
+{
+  "instanceId": "paletgen-project-123",
+  "projectId": "project-123",
+  "message": "History purged"
+}
+```
+
+## GET - List generations
+
+### Notes
+
+- Returns the first page of at most 100 instances whose IDs begin with `paletgen-`.
+- A `continuationToken` may be returned, but the current HTTP endpoint does not accept a continuation token for the next page.
+
+### Request
+
+Path and query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/orchestration/list"
+```
+
+### Sample response
+
+```json
+{
+  "instances": [
+    {
+      "instanceId": "paletgen-project-123",
+      "projectId": "project-123",
+      "runtimeStatus": "Completed",
+      "createdTime": "2026-08-20T14:15:00Z",
+      "lastUpdatedTime": "2026-08-20T14:30:00Z",
+      "customStatus": { "phase": "Complete" }
+    }
+  ],
+  "continuationToken": null
+}
+```

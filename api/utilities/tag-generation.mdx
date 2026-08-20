@@ -1,0 +1,38 @@
+---
+title: Tag Generation
+slug: /tag-generation
+---
+
+# Tag generation
+
+Generates a database-unique MatchMaker tag.
+
+## GET - Generate tag
+
+### Endpoint
+
+```
+GET https://matchmakeredlabs.net/api/tag/generate
+```
+
+### Notes
+
+- Authentication is required; no additional privilege is checked.
+- The response format is `tag:matchmakeredlabs.net:{two uppercase letters}{six digits}`.
+- The service makes as many as five random generation attempts. Each attempt checks up to 100 sequential numeric values and never advances beyond `999999`; a later attempt starts with a new random number and letter code.
+- A tag is checked against descriptor URLs before it is returned. The endpoint does not reserve the tag, so the later write still needs normal duplicate handling if multiple clients race.
+
+### Request
+
+Path and query parameters: none. Request body: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/tag/generate"
+```
+
+### Sample response
+
+```json
+{ "tag": "tag:matchmakeredlabs.net:QF042731" }
+```

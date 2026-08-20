@@ -51,7 +51,8 @@ const sidebars = {
       collapsed: false,
       items: [
         "identity_perm/users",
-        "identity_perm/organizations",
+        "identity_perm/customers",
+        "identity_perm/projects",
         "identity_perm/groups",
       ],
     },
@@ -61,6 +62,32 @@ const sidebars = {
       collapsible: true,
       collapsed: false,
       items: ["match_reporting/report", "match_reporting/match_palet"],
+    },
+    {
+      type: "category",
+      label: "PaletGen",
+      collapsible: true,
+      collapsed: false,
+      items: [
+        "paletgen/projects",
+        "paletgen/statements",
+        "paletgen/descriptors",
+        "paletgen/assignments",
+        "paletgen/memberships",
+        "paletgen/prompts",
+        "paletgen/orchestration",
+      ],
+    },
+    {
+      type: "category",
+      label: "Utilities & Service",
+      collapsible: true,
+      collapsed: false,
+      items: [
+        "utilities/account-management",
+        "utilities/tag-generation",
+        "utilities/service-status",
+      ],
     },
   ],
 };

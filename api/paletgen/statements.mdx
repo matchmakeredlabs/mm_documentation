@@ -1,0 +1,560 @@
+---
+title: PaletGen Statements
+slug: /paletgen/statements
+---
+
+# PaletGen statements
+
+These endpoints manage generated statements, review approvals, archived merge sources, and merge audit records. All requests require `Authorization: Bearer <token>` and project read or write access as appropriate.
+
+## Endpoint summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/paletgen/statements` | List project statements. |
+| GET | `/api/paletgen/statements/{statementId}` | Retrieve a statement. |
+| POST | `/api/paletgen/statements` | Create a statement. |
+| PUT | `/api/paletgen/statements/{statementId}` | Edit a statement or its status. |
+| DELETE | `/api/paletgen/statements/{statementId}` | Delete a statement. |
+| POST | `/api/paletgen/search/statements` | Vector-search statements. |
+| POST / DELETE | `/api/paletgen/statements/approve/{statementId}` | Add or remove the caller's approval. |
+| POST | `/api/paletgen/statements/undo-merge/{mergeRecordId}` | Undo a merge. |
+| POST | `/api/paletgen/statements/unarchive/{statementId}` | Restore an archived statement. |
+| GET | `/api/paletgen/statements/merge-records[/{mergeRecordId}]` | List or retrieve applied merges. |
+| GET | `/api/paletgen/statements/merge-decisions[/{decisionRecordId}]` | List or retrieve merge decisions. |
+
+## GET - List statements
+
+### Notes
+
+- Project members should supply `projectId`; system administrators may omit it to list across projects.
+- Archived statements are hidden by default. Embeddings are always removed from list responses.
+- `outputSimilarityScores` is enabled by the parameter's presence, even when its value is `false`.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | For project members | Limit results to one project. |
+| `includeArchived` | boolean | No | Include statements whose `lifecycleStatus` is `archived`. Default `false`. |
+| `outputSimilarityScores` | flag | No | Add `_similarityScore` calculated against the returned statements. |
+
+Path parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/statements?projectId=project-123&outputSimilarityScores=true"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "statement-101",
+      "type": "generated-statement",
+      "projectId": "project-123",
+      "statement": "Energy can be transferred between objects.",
+      "stmtType": "D",
+      "lifecycleStatus": "active",
+      "status": { "type": "draft" },
+      "_similarityScore": 0.82,
+      "_canUpdate": true
+    }
+  ]
+}
+```
+
+## GET - Statement by ID
+
+### Notes
+
+- Requires read access to the statement's project.
+- Unlike list responses, an item response can contain the stored `embedding`.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `statementId` | string | Yes | Generated statement ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/statements/statement-101"
+```
+
+### Sample response
+
+```json
+{
+  "id": "statement-101",
+  "type": "generated-statement",
+  "projectId": "project-123",
+  "statement": "Energy can be transferred between objects.",
+  "stmtType": "D",
+  "embedding": [0.012, -0.034, 0.056],
+  "lifecycleStatus": "active",
+  "status": { "type": "draft" },
+  "_canUpdate": true
+}
+```
+
+## POST - Create statement
+
+### Notes
+
+- Requires write access to the project in the body.
+- `statement` is the only field specifically required by this handler. The endpoint does not generate an embedding on create, so callers creating fully searchable records should provide one or use the generation workflow.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | No | Authorization fallback when `projectId` is not present in the body. |
+
+Path parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | Yes | Statement ID. |
+| `projectId` | string | Yes | Owning PaletGen project. |
+| `statement` | string | Yes | Statement text. |
+| `stmtType` | string | No | Usually `CU`, `D`, `P`, or `STFk`. |
+| `embedding` | number[] | No | Precomputed vector used by vector search. |
+| `lifecycleStatus` | string | No | Usually `active` or `archived`. |
+| `status` | object | No | Review workflow status. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -X POST \
+  -d '{
+    "id": "statement-101",
+    "projectId": "project-123",
+    "statement": "Energy can be transferred between objects.",
+    "stmtType": "D",
+    "lifecycleStatus": "active",
+    "status": { "type": "draft" }
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/statements"
+```
+
+### Sample response
+
+```json
+{
+  "id": "statement-101",
+  "type": "generated-statement",
+  "projectId": "project-123",
+  "statement": "Energy can be transferred between objects.",
+  "stmtType": "D",
+  "lifecycleStatus": "active",
+  "status": { "type": "draft" },
+  "_canUpdate": true
+}
+```
+
+## PUT - Update statement
+
+### Notes
+
+- Requires write access to the existing statement's project. `projectId` cannot be changed.
+- Send the complete statement representation.
+- Changing `statement` records `statementHistory`, updates `modifiedOn`, and regenerates the embedding.
+- A status change adds the previous status to `pastStatuses`. Changing to `accepted_for_review` initializes `status.additionalInfo.reviewApprovals` when omitted.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `statementId` | string | Yes | Statement ID; it must match the body `id`. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PUT \
+  -d '{
+    "id": "statement-101",
+    "projectId": "project-123",
+    "statement": "Energy transfers between interacting objects.",
+    "stmtType": "D",
+    "lifecycleStatus": "active",
+    "status": { "type": "accepted_for_review" }
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/statements/statement-101"
+```
+
+### Sample response
+
+```json
+{
+  "id": "statement-101",
+  "type": "generated-statement",
+  "projectId": "project-123",
+  "statement": "Energy transfers between interacting objects.",
+  "status": {
+    "type": "accepted_for_review",
+    "dateChanged": "2026-08-20T16:00:00Z",
+    "changedByUserId": "reviewer@example.com",
+    "additionalInfo": { "reviewApprovals": [] }
+  },
+  "pastStatuses": [{ "type": "draft" }],
+  "_canUpdate": true
+}
+```
+
+## DELETE - Delete statement
+
+### Notes
+
+- Requires write access to the statement's project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `statementId` | string | Yes | Statement ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/statements/statement-101"
+```
+
+### Sample response
+
+```json
+{ "id": "statement-101" }
+```
+
+## POST - Search statements
+
+### Notes
+
+- Performs vector search and returns up to 1,000 results for the requested offset.
+- Supply either `matchText` or a previously returned `generatedEmbedding`. Reusing the embedding avoids generating it again on subsequent pages.
+- Archived statements are excluded unless `includeArchived=true`.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Limit and authorize the search for one project. |
+| `includeArchived` | boolean | No | Include archived statements. Default `false`. |
+
+Path parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `matchText` | string | Conditional | Text to embed and search for. |
+| `generatedEmbedding` | number[] | Conditional | Existing query embedding instead of `matchText`. |
+| `offset` | integer | No | Vector-search page offset. Default `0`. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -X POST \
+  -d '{"matchText":"energy transfer","offset":0}' \
+  "https://matchmakeredlabs.net/api/paletgen/search/statements?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "generatedEmbedding": [0.012, -0.034, 0.056],
+  "statements": [
+    {
+      "id": "statement-101",
+      "projectId": "project-123",
+      "statement": "Energy transfers between interacting objects.",
+      "_canUpdate": true
+    }
+  ],
+  "nextOffset": 1,
+  "count": 1
+}
+```
+
+## POST - Add an approval
+
+### Notes
+
+- The statement must have status `accepted_for_review` and the caller must have project write access.
+- Each user may approve a statement once. The action is also appended to `approvalHistory`.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `statementId` | string | Yes | Statement to approve. |
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `comment` | string | No | Review comment. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -X POST -d '{"comment":"Approved."}' \
+  "https://matchmakeredlabs.net/api/paletgen/statements/approve/statement-101?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{ "id": "statement-101" }
+```
+
+## DELETE - Remove your approval
+
+### Notes
+
+- Removes only the current user's approval and records `approval_removed` in `approvalHistory`.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `statementId` | string | Yes | Statement whose approval should be removed. |
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/statements/approve/statement-101?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{ "id": "statement-101" }
+```
+
+## POST - Undo a merge
+
+### Notes
+
+- Requires project write access.
+- Restores the merged source statements, updates affected descriptor associations, and marks the merge record as reverted. A merge that is already reverted cannot be undone again.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `mergeRecordId` | string | Yes | Applied merge record to reverse. |
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+Request body: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X POST \
+  "https://matchmakeredlabs.net/api/paletgen/statements/undo-merge/merge-789?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "success": true,
+  "errorMessage": null,
+  "restoredStatementIds": ["statement-102", "statement-103"],
+  "updatedDescriptorIds": ["project-descriptor-22"]
+}
+```
+
+## POST - Unarchive a statement
+
+### Notes
+
+- Requires project write access. The statement must belong to the supplied project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `statementId` | string | Yes | Archived statement to restore. |
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+Request body: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X POST \
+  "https://matchmakeredlabs.net/api/paletgen/statements/unarchive/statement-102?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "success": true,
+  "errorMessage": null,
+  "statementId": "statement-102"
+}
+```
+
+## GET - List merge records
+
+### Notes
+
+- Requires project read access. Results are ordered by `createdOn` descending.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+Path parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/statements/merge-records?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "merge-789",
+      "type": "statement-merge-record",
+      "projectId": "project-123",
+      "survivorStatementId": "statement-101",
+      "mergedSourceStatementIds": ["statement-102"],
+      "similarity": 0.94,
+      "reason": "The statements express the same concept.",
+      "status": "active",
+      "mergeOutputType": "new-statement"
+    }
+  ],
+  "count": 1
+}
+```
+
+## GET - Merge record by ID
+
+### Notes
+
+- Returns `404` when the record does not belong to the supplied project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `mergeRecordId` | string | Yes | Merge record ID. |
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/statements/merge-records/merge-789?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "id": "merge-789",
+  "type": "statement-merge-record",
+  "projectId": "project-123",
+  "survivorStatementId": "statement-101",
+  "mergedSourceStatementIds": ["statement-102"],
+  "status": "active"
+}
+```
+
+## GET - List merge decisions
+
+### Notes
+
+- Requires project read access. These records preserve the model's decision even when no merge was applied.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+Path parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/statements/merge-decisions?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "decision-456",
+      "type": "statement-merge-decision-record",
+      "projectId": "project-123",
+      "anchorStatementId": "statement-101",
+      "candidateSourceStatementId": "statement-102",
+      "decision": "merge",
+      "confidence": 0.96,
+      "reasoning": "The concepts are equivalent."
+    }
+  ],
+  "count": 1
+}
+```
+
+## GET - Merge decision by ID
+
+### Notes
+
+- Returns `404` when the record does not belong to the supplied project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `decisionRecordId` | string | Yes | Merge-decision record ID. |
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Owning project ID. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/statements/merge-decisions/decision-456?projectId=project-123"
+```
+
+### Sample response
+
+```json
+{
+  "id": "decision-456",
+  "type": "statement-merge-decision-record",
+  "projectId": "project-123",
+  "decision": "merge",
+  "confidence": 0.96,
+  "candidateStatementIds": ["statement-102"],
+  "createdOn": "2026-08-20T16:30:00Z"
+}
+```

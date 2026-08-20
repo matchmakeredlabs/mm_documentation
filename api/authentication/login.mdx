@@ -16,6 +16,7 @@ This endpoint allows users to log in and receive an authorization token to acces
 |----------|-------------|
 | [POST - Form Authentication](#post---form-authentication) | Log in using form-encoded credentials to receive an authorization token. |
 | [POST - JSON Authentication](#post---json-authentication) | Log in using JSON credentials to receive an authorization token. |
+| [GET - Logout](#get---logout) | Clear the current browser authentication state. |
 
 ## POST - Form Authentication
 ---
@@ -216,4 +217,76 @@ print(req.text)
 {
   "authorizationToken": "st=Core&un=<username>&x=21234602T21560217Z&m=0qhd9jkTaIqbT_V5xTUmQ4HJhMpd3h5AAB9p9AnceUCs"
 }
+```
+
+## GET - Logout
+
+### Endpoint
+
+```
+GET https://matchmakeredlabs.net/api/logout
+```
+
+**Notes:**
+
+- No path parameters, query parameters, or request body are required.
+- This clears the current response/browser authentication state. Clients that retain an authorization token should also discard it locally.
+
+### Request
+
+#### Sample Requests
+
+<Tabs
+  groupId="logout"
+  defaultValue="curl"
+  values={[
+    { label: 'cURL', value: 'curl' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'Python', value: 'python' },
+  ]}
+>
+
+<TabItem value="curl">
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/logout"
+```
+
+</TabItem>
+
+<TabItem value="js">
+
+```js
+const response = await fetch("https://matchmakeredlabs.net/api/logout", {
+  method: "GET",
+  credentials: "include"
+});
+
+console.log(await response.json());
+```
+
+</TabItem>
+
+<TabItem value="python">
+
+```python
+import requests
+
+response = requests.get(
+    "https://matchmakeredlabs.net/api/logout",
+    headers={"Authorization": "Bearer <your_token>"},
+)
+print(response.json())
+```
+
+</TabItem>
+</Tabs>
+
+### Response
+
+#### Example Response
+
+```json
+{ "msg": "Logged out." }
 ```

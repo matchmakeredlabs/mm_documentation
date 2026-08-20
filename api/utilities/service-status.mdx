@@ -1,0 +1,39 @@
+---
+title: Service Status
+slug: /service-status
+---
+
+# Service status
+
+Returns the deployed server assembly name, version, and description.
+
+## GET or POST - Service status
+
+### Endpoint
+
+```
+GET https://matchmakeredlabs.net/status
+POST https://matchmakeredlabs.net/status
+```
+
+### Notes
+
+- Authentication is not required.
+- This route intentionally does not use the `/api` prefix.
+- GET and POST return the same plain-text response. GET is preferred for health checks.
+
+### Request
+
+Path and query parameters: none. Request body: none.
+
+```bash
+curl "https://matchmakeredlabs.net/status"
+```
+
+### Sample response
+
+```text
+MatchMakerMvp
+1.0.0.0
+MatchMaker API
+```

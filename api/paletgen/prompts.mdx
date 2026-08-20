@@ -1,0 +1,265 @@
+---
+title: PaletGen Prompts
+slug: /paletgen/prompts
+---
+
+# PaletGen prompts
+
+Prompt records hold the templates selected when a PaletGen project starts. All prompt CRUD and seeding endpoints require a bearer token plus system-wide descriptor privilege: `ReadDescriptor` to read and `WriteDescriptor` to create, update, delete, or seed.
+
+## Endpoint summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/paletgen/prompts` | List prompt templates. |
+| GET | `/api/paletgen/prompts/{promptId}` | Retrieve one prompt. |
+| POST | `/api/paletgen/prompts` | Create a prompt. |
+| PUT | `/api/paletgen/prompts/{promptId}` | Create a new prompt version. |
+| DELETE | `/api/paletgen/prompts/{promptId}` | Delete an unused, non-seed prompt. |
+| POST | `/api/paletgen/seed-prompts` | Create or refresh the built-in prompts. |
+
+## Template slots and variables
+
+| Slot | Required variables | Additional allowed variables |
+|---|---|---|
+| `system` | None | None |
+| `generate` | `{{leafName}}`, `{{leafDescription}}`, `{{leafContext}}`, `{{leafId}}` | `{{existingStatements}}` |
+| `merge` | `{{candidatesBlock}}`, `{{anchorId}}`, `{{outputSchema}}` | None |
+
+Unknown variables and missing required variables are rejected.
+
+## GET - List prompts
+
+### Notes
+
+- Returns built-in seed prompts and user-authored prompts.
+
+### Request
+
+Path and query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/prompts"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "seed-prompt-generate-default",
+      "type": "paletgenprompt",
+      "slot": "generate",
+      "name": "Default Statement Generation",
+      "description": "Generates statements for one leaf element.",
+      "template": "Element: {{leafName}} ...",
+      "variableNames": ["leafName", "leafDescription", "leafContext", "leafId", "existingStatements"],
+      "version": 1,
+      "isSeed": true,
+      "history": [],
+      "_canUpdate": true
+    }
+  ]
+}
+```
+
+## GET - Prompt by ID
+
+### Notes
+
+- `history` contains prior versions; the current version remains in the top-level fields.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `promptId` | string | Yes | Prompt ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/prompts/my-generate-prompt"
+```
+
+### Sample response
+
+```json
+{
+  "id": "my-generate-prompt",
+  "type": "paletgenprompt",
+  "slot": "generate",
+  "name": "Concise generation prompt",
+  "description": "Generates concise statements.",
+  "template": "For {{leafName}} ({{leafId}}), use {{leafDescription}} and {{leafContext}}.",
+  "variableNames": ["leafName", "leafId", "leafDescription", "leafContext"],
+  "version": 1,
+  "isSeed": false,
+  "history": [],
+  "createdByUserId": "admin@example.com",
+  "_canUpdate": true
+}
+```
+
+## POST - Create prompt
+
+### Notes
+
+- The API generates a GUID if `id` is omitted.
+- `version`, `history`, creator, timestamps, and extracted `variableNames` are managed by the service. Omit `isSeed` for user-authored prompts; the current handler defaults it to `false` only when it is absent.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | No | Prompt ID. |
+| `slot` | string | Yes | `system`, `generate`, or `merge`. |
+| `name` | string | Yes | Prompt display name. |
+| `description` | string | Yes | Description; it may be empty. |
+| `template` | string | Yes | Template text using only variables allowed for its slot. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  -d '{
+    "id":"my-generate-prompt",
+    "slot":"generate",
+    "name":"Concise generation prompt",
+    "description":"Generates concise statements.",
+    "template":"For {{leafName}} ({{leafId}}), use {{leafDescription}} and {{leafContext}}."
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/prompts"
+```
+
+### Sample response
+
+```json
+{
+  "id": "my-generate-prompt",
+  "type": "paletgenprompt",
+  "slot": "generate",
+  "name": "Concise generation prompt",
+  "description": "Generates concise statements.",
+  "template": "For {{leafName}} ({{leafId}}), use {{leafDescription}} and {{leafContext}}.",
+  "variableNames": ["leafName", "leafId", "leafDescription", "leafContext"],
+  "version": 1,
+  "isSeed": false,
+  "history": [],
+  "_canUpdate": true
+}
+```
+
+## PUT - Update prompt
+
+### Notes
+
+- Send the complete prompt representation. The `slot`, creation data, creator, and seed flag cannot change.
+- Each successful update increments `version` and appends the previous name, description, template, version, and modification data to `history`.
+- Existing projects keep their snapshotted prompt version and are not changed by an edit.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `promptId` | string | Yes | Prompt ID; it must match the body `id`. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -X PUT \
+  -d '{
+    "id":"my-generate-prompt",
+    "slot":"generate",
+    "name":"Concise generation prompt v2",
+    "description":"Generates concise statements.",
+    "template":"For {{leafName}} ({{leafId}}), consider {{leafDescription}} in {{leafContext}}."
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/prompts/my-generate-prompt"
+```
+
+### Sample response
+
+```json
+{
+  "id": "my-generate-prompt",
+  "type": "paletgenprompt",
+  "slot": "generate",
+  "name": "Concise generation prompt v2",
+  "version": 2,
+  "history": [
+    {
+      "version": 1,
+      "name": "Concise generation prompt",
+      "description": "Generates concise statements.",
+      "template": "For {{leafName}} ({{leafId}}), use {{leafDescription}} and {{leafContext}}.",
+      "modifiedByUserId": "admin@example.com"
+    }
+  ],
+  "_canUpdate": true
+}
+```
+
+## DELETE - Delete prompt
+
+### Notes
+
+- Built-in seed prompts cannot be deleted.
+- A prompt referenced by any project's snapshotted bindings cannot be deleted.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `promptId` | string | Yes | Prompt ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/prompts/my-generate-prompt"
+```
+
+### Sample response
+
+```json
+{ "id": "my-generate-prompt" }
+```
+
+## POST - Seed built-in prompts
+
+### Notes
+
+- Idempotently manages the built-in `system`, `generate`, and `merge` prompts.
+- By default existing seeds are skipped. `force=true` overwrites each live seed with the built-in text, increments its version, and saves the prior version in history.
+
+### Request
+
+| Query parameter | Type | Required | Description |
+|---|---|---|---|
+| `force` | boolean | No | Refresh existing seeds when `true`. Default `false`. |
+
+Path parameters and request body: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -X POST \
+  "https://matchmakeredlabs.net/api/paletgen/seed-prompts?force=false"
+```
+
+### Sample response
+
+```json
+{
+  "created": [],
+  "updated": [],
+  "skipped": [
+    "seed-prompt-system-default",
+    "seed-prompt-generate-default",
+    "seed-prompt-merge-default"
+  ]
+}
+```

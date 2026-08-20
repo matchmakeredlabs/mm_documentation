@@ -1,0 +1,517 @@
+---
+title: /projects
+slug: /projects
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# /projects
+
+The projects API manages the projects that belong to customer accounts. Projects were previously called organizations and returned as type `org`; the current API uses `/projects` and returns type `project`.
+
+All requests require an authenticated bearer token.
+
+## Table of Contents
+
+| Endpoint | Description |
+|----------|-------------|
+| [GET - All Projects](#get---all-projects) | Retrieve the projects the caller can access. |
+| [GET - Project by ID](#get---project-by-id) | Retrieve one project by ID. |
+| [POST - Create Project](#post---create-project) | Create a project for a customer. |
+| [PUT - Update Project](#put---update-project) | Update a project's details and role assignments. |
+| [DELETE - Remove Project](#delete---remove-project) | Delete a project and its project-owned groups. |
+
+## GET - All Projects
+
+### Endpoint
+
+```text
+GET https://matchmakeredlabs.net/api/projects
+```
+
+### Notes
+
+Results are filtered to projects the caller may read. Global administrators and administrators with `WriteCustomer` on `adminorganization` can list all projects. A caller with `WriteCustomer` on a customer can also list that customer's projects, including before the caller has a project-level role.
+
+The response is an object containing an `items` array. Legacy records stored with type `org` are normalized to type `project` in API responses.
+
+### Request
+
+#### Query Parameters
+
+Optional query parameters perform exact property matches. For example, `customerId` limits results to one customer:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `customerId` | string | No | Return projects belonging to this customer. |
+
+#### Sample Request
+
+<Tabs groupId="get_all_projects" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/projects?customerId=customer-123"
+```
+</TabItem>
+<TabItem value="js">
+```js
+const response = await fetch(
+    "https://matchmakeredlabs.net/api/projects?customerId=customer-123",
+    { headers: { Authorization: `Bearer ${TOKEN}` } }
+);
+const projects = await response.json();
+```
+</TabItem>
+<TabItem value="python">
+```python
+import requests
+
+response = requests.get(
+    "https://matchmakeredlabs.net/api/projects",
+    params={"customerId": "customer-123"},
+    headers={"Authorization": f"Bearer {token}"}
+)
+projects = response.json()
+```
+</TabItem>
+</Tabs>
+
+### Sample Response
+
+```json
+{
+    "items": [
+        {
+            "id": "curriculumteam",
+            "type": "project",
+            "name": "CurriculumTeam",
+            "description": "Curriculum alignment project",
+            "customerId": "customer-123",
+            "members": [
+                {
+                    "id": "user@example.com",
+                    "role": "owner"
+                }
+            ],
+            "_canUpdate": true,
+            "_canWriteGroups": true,
+            "_canWriteDescriptors": true,
+            "_maxAssignableRole": "owner"
+        }
+    ]
+}
+```
+
+## GET - Project by ID
+
+### Endpoint
+
+```text
+GET https://matchmakeredlabs.net/api/projects/{projectId}
+```
+
+### Notes
+
+Requires `ReadProject` on the requested project. Returns `404 Not Found` when the ID does not identify a project and `403 Forbidden` when the caller cannot read it.
+
+### Request
+
+#### Query Parameters
+
+None.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `projectId` | string | Yes | Project identifier. |
+
+#### Sample Request
+
+<Tabs groupId="get_project_by_id" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X GET "https://matchmakeredlabs.net/api/projects/curriculumteam"
+```
+</TabItem>
+<TabItem value="js">
+```js
+const projectId = "curriculumteam";
+const response = await fetch(
+    `https://matchmakeredlabs.net/api/projects/${projectId}`,
+    { headers: { Authorization: `Bearer ${TOKEN}` } }
+);
+const project = await response.json();
+```
+</TabItem>
+<TabItem value="python">
+```python
+import requests
+
+project_id = "curriculumteam"
+response = requests.get(
+    f"https://matchmakeredlabs.net/api/projects/{project_id}",
+    headers={"Authorization": f"Bearer {token}"}
+)
+project = response.json()
+```
+</TabItem>
+</Tabs>
+
+### Sample Response
+
+```json
+{
+    "id": "curriculumteam",
+    "type": "project",
+    "name": "CurriculumTeam",
+    "description": "Curriculum alignment project",
+    "customerId": "customer-123",
+    "members": [
+        {
+            "id": "user@example.com",
+            "role": "owner"
+        },
+        {
+            "id": "customer-123:reviewers",
+            "role": "editor"
+        }
+    ],
+    "_canUpdate": true,
+    "_canWriteGroups": true,
+    "_canWriteDescriptors": true,
+    "_maxAssignableRole": "owner"
+}
+```
+
+## POST - Create Project
+
+### Endpoint
+
+```text
+POST https://matchmakeredlabs.net/api/projects?customerId={customerId}
+```
+
+### Notes
+
+The `customerId` query parameter is required. The caller must have `WriteCustomer` on that customer. The customer must exist and must not have reached its `allowedProjects` limit.
+
+The server derives the project ID by lowercasing `name`. Names may contain letters, digits, and underscores, but not spaces. Every member must identify an existing user or group and have a role of `reader`, `editor`, or `owner`. Effective users contributed by nested groups count toward the customer's `usersPerProject` limit.
+
+### Request
+
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `customerId` | string | Yes | Customer that will own the new project. |
+
+#### Request Body
+
+```json
+{
+    "name": "CurriculumTeam",
+    "description": "Curriculum alignment project",
+    "members": [
+        {
+            "id": "user@example.com",
+            "role": "owner"
+        }
+    ]
+}
+```
+
+#### Sample Request
+
+<Tabs groupId="create_project" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-X POST "https://matchmakeredlabs.net/api/projects?customerId=customer-123" \
+--data '{
+  "name": "CurriculumTeam",
+  "description": "Curriculum alignment project",
+  "members": [{"id": "user@example.com", "role": "owner"}]
+}'
+```
+</TabItem>
+<TabItem value="js">
+```js
+const response = await fetch(
+    "https://matchmakeredlabs.net/api/projects?customerId=customer-123",
+    {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: "CurriculumTeam",
+            description: "Curriculum alignment project",
+            members: [{ id: "user@example.com", role: "owner" }]
+        })
+    }
+);
+const createdProject = await response.json();
+```
+</TabItem>
+<TabItem value="python">
+```python
+import requests
+
+project = {
+    "name": "CurriculumTeam",
+    "description": "Curriculum alignment project",
+    "members": [{"id": "user@example.com", "role": "owner"}]
+}
+response = requests.post(
+    "https://matchmakeredlabs.net/api/projects",
+    params={"customerId": "customer-123"},
+    json=project,
+    headers={"Authorization": f"Bearer {token}"}
+)
+created_project = response.json()
+```
+</TabItem>
+</Tabs>
+
+### Sample Response
+
+```json
+{
+    "id": "curriculumteam",
+    "type": "project",
+    "name": "CurriculumTeam",
+    "description": "Curriculum alignment project",
+    "customerId": "customer-123",
+    "members": [
+        {
+            "id": "user@example.com",
+            "role": "owner"
+        }
+    ],
+    "_canUpdate": true,
+    "_canWriteGroups": true,
+    "_canWriteDescriptors": true,
+    "_maxAssignableRole": "owner"
+}
+```
+
+## PUT - Update Project
+
+### Endpoint
+
+```text
+PUT https://matchmakeredlabs.net/api/projects/{projectId}
+```
+
+### Notes
+
+Requires `WriteProject` on the project. The project name—and therefore its derived ID—cannot change. Its `customerId` is immutable and is preserved from the existing record.
+
+PUT replaces the writable project representation rather than applying a partial patch. Include `name`, `description`, and the complete `members` array. A caller cannot add, change, or remove a role above the caller's own highest role.
+
+### Request
+
+#### Query Parameters
+
+None.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `projectId` | string | Yes | Existing project identifier. |
+
+#### Request Body
+
+```json
+{
+    "name": "CurriculumTeam",
+    "description": "Updated curriculum alignment project",
+    "members": [
+        {
+            "id": "user@example.com",
+            "role": "owner"
+        },
+        {
+            "id": "customer-123:reviewers",
+            "role": "editor"
+        }
+    ]
+}
+```
+
+#### Sample Request
+
+<Tabs groupId="update_project" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-H "Content-Type: application/json" \
+-X PUT "https://matchmakeredlabs.net/api/projects/curriculumteam" \
+--data @project.json
+```
+</TabItem>
+<TabItem value="js">
+```js
+const projectId = "curriculumteam";
+const response = await fetch(
+    `https://matchmakeredlabs.net/api/projects/${projectId}`,
+    {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(project)
+    }
+);
+const updatedProject = await response.json();
+```
+</TabItem>
+<TabItem value="python">
+```python
+import requests
+
+response = requests.put(
+    "https://matchmakeredlabs.net/api/projects/curriculumteam",
+    json=project,
+    headers={"Authorization": f"Bearer {token}"}
+)
+updated_project = response.json()
+```
+</TabItem>
+</Tabs>
+
+### Sample Response
+
+```json
+{
+    "id": "curriculumteam",
+    "type": "project",
+    "name": "CurriculumTeam",
+    "description": "Updated curriculum alignment project",
+    "customerId": "customer-123",
+    "members": [
+        {
+            "id": "user@example.com",
+            "role": "owner"
+        },
+        {
+            "id": "customer-123:reviewers",
+            "role": "editor"
+        }
+    ],
+    "_canUpdate": true,
+    "_canWriteGroups": true,
+    "_canWriteDescriptors": true,
+    "_maxAssignableRole": "owner"
+}
+```
+
+## DELETE - Remove Project
+
+### Endpoint
+
+```text
+DELETE https://matchmakeredlabs.net/api/projects/{projectId}
+```
+
+### Notes
+
+Requires `WriteProject` on the project. Deleting a project also deletes groups owned by that project and removes those groups from other group, project, and customer memberships. This operation does not delete the owning customer.
+
+### Request
+
+#### Query Parameters
+
+None.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `projectId` | string | Yes | Project identifier. |
+
+#### Sample Request
+
+<Tabs groupId="delete_project" defaultValue="curl" values={[
+  { label: 'cURL', value: 'curl' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Python', value: 'python' },
+]}>
+<TabItem value="curl">
+```curl
+curl \
+-H "Authorization: Bearer $TOKEN" \
+-X DELETE "https://matchmakeredlabs.net/api/projects/curriculumteam"
+```
+</TabItem>
+<TabItem value="js">
+```js
+const response = await fetch(
+    "https://matchmakeredlabs.net/api/projects/curriculumteam",
+    {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${TOKEN}` }
+    }
+);
+const result = await response.json();
+```
+</TabItem>
+<TabItem value="python">
+```python
+import requests
+
+response = requests.delete(
+    "https://matchmakeredlabs.net/api/projects/curriculumteam",
+    headers={"Authorization": f"Bearer {token}"}
+)
+result = response.json()
+```
+</TabItem>
+</Tabs>
+
+### Sample Response
+
+```json
+{
+    "id": "curriculumteam"
+}
+```
+
+## Common Status Codes
+
+| Status | Meaning |
+|--------|---------|
+| `200 OK` | The operation succeeded. |
+| `400 Bad Request` | The URL, query parameters, or request body are invalid. |
+| `401 Unauthorized` | Authentication is missing or invalid. |
+| `403 Forbidden` | The caller lacks the required privilege. |
+| `404 Not Found` | The requested project does not exist. |
+| `409 Conflict` | A project with the derived ID already exists. |

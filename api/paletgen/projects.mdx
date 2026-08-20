@@ -1,0 +1,226 @@
+---
+title: PaletGen Projects
+slug: /paletgen/projects
+---
+
+# PaletGen projects
+
+PaletGen projects copy a reference collection, generate statements for it, and track the human-review workflow. All requests require `Authorization: Bearer <token>`.
+
+## Endpoint summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/paletgen/projects` | List projects visible to the caller. |
+| GET | `/api/paletgen/projects/{projectId}` | Retrieve one project. |
+| POST | `/api/paletgen/projects` | Create a project and start generation. |
+| PUT | `/api/paletgen/projects/{projectId}` | Update project metadata or move one workflow step. |
+| DELETE | `/api/paletgen/projects/{projectId}` | Delete a project and its PaletGen data. |
+
+## GET - List projects
+
+### Notes
+
+- A system administrator with `ReadDescriptor` sees every project. Other users see projects where they have an accepted membership.
+- The response is wrapped in an `items` array.
+
+### Request
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/projects"
+```
+
+### Sample response
+
+```json
+{
+  "items": [
+    {
+      "id": "project-123",
+      "type": "paletgenproject",
+      "name": "Grade 8 Science",
+      "referenceId": "collection-456",
+      "generationStatus": "running",
+      "workflowStep": "check_statement_element_associations",
+      "orchestrationInstanceId": "paletgen-project-123",
+      "_canUpdate": true
+    }
+  ]
+}
+```
+
+## GET - Project by ID
+
+### Notes
+
+- Requires global `ReadDescriptor` privilege or accepted membership in the project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://matchmakeredlabs.net/api/paletgen/projects/project-123"
+```
+
+### Sample response
+
+```json
+{
+  "id": "project-123",
+  "type": "paletgenproject",
+  "name": "Grade 8 Science",
+  "referenceId": "collection-456",
+  "promptBindings": {
+    "system": { "promptId": "seed-prompt-system-default", "version": 1 },
+    "generate": { "promptId": "seed-prompt-generate-default", "version": 1 },
+    "merge": { "promptId": "seed-prompt-merge-default", "version": 1 }
+  },
+  "generationStatus": "running",
+  "workflowStep": "check_statement_element_associations",
+  "createdByUserId": "reviewer@example.com",
+  "createdOn": "2026-08-20T14:15:00Z",
+  "modifiedOn": "2026-08-20T14:15:01Z",
+  "orchestrationInstanceId": "paletgen-project-123",
+  "_canUpdate": true
+}
+```
+
+## POST - Create project
+
+### Notes
+
+- Currently requires system-wide `WriteDescriptor` privilege.
+- `referenceId` must identify an existing collection.
+- One prompt ID is required for each `system`, `generate`, and `merge` slot. The API stores the selected prompt versions, creates an accepted creator membership, and starts generation before returning.
+- `generationStatus`, timestamps, creator, orchestration ID, and the initial workflow step are server controlled.
+
+### Request
+
+Path and query parameters: none.
+
+| Body parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | No | Project ID. A GUID is generated when omitted. |
+| `name` | string | Yes | Display name. |
+| `referenceId` | string | Yes | Existing reference collection ID. |
+| `promptBindings.system` | string | Yes | ID of a `system` prompt. |
+| `promptBindings.generate` | string | Yes | ID of a `generate` prompt. |
+| `promptBindings.merge` | string | Yes | ID of a `merge` prompt. |
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -X POST \
+  -d '{
+    "id": "project-123",
+    "name": "Grade 8 Science",
+    "referenceId": "collection-456",
+    "promptBindings": {
+      "system": "seed-prompt-system-default",
+      "generate": "seed-prompt-generate-default",
+      "merge": "seed-prompt-merge-default"
+    }
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/projects"
+```
+
+### Sample response
+
+```json
+{
+  "id": "project-123",
+  "type": "paletgenproject",
+  "name": "Grade 8 Science",
+  "referenceId": "collection-456",
+  "promptBindings": {
+    "system": { "promptId": "seed-prompt-system-default", "version": 1 },
+    "generate": { "promptId": "seed-prompt-generate-default", "version": 1 },
+    "merge": { "promptId": "seed-prompt-merge-default", "version": 1 }
+  },
+  "generationStatus": "running",
+  "workflowStep": "check_statement_element_associations",
+  "orchestrationInstanceId": "paletgen-project-123",
+  "_canUpdate": true
+}
+```
+
+## PUT - Update project
+
+### Notes
+
+- Requires global `WriteDescriptor` privilege or accepted membership in the project.
+- Send the complete project representation, not a JSON Patch document.
+- `referenceId`, creation data, generation state, orchestration ID, and prompt bindings are immutable.
+- `workflowStep` may move only to the immediately previous or next value in this sequence: `check_statement_element_associations`, `verify_and_edit_statements_in_context`, `approve_statements`, `review_statements_not_approved`.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project ID; it must match the body `id`. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PUT \
+  -d '{
+    "id": "project-123",
+    "name": "Grade 8 Science Review",
+    "referenceId": "collection-456",
+    "workflowStep": "verify_and_edit_statements_in_context"
+  }' \
+  "https://matchmakeredlabs.net/api/paletgen/projects/project-123"
+```
+
+### Sample response
+
+```json
+{
+  "id": "project-123",
+  "type": "paletgenproject",
+  "name": "Grade 8 Science Review",
+  "referenceId": "collection-456",
+  "workflowStep": "verify_and_edit_statements_in_context",
+  "workflowStepUpdatedAt": "2026-08-20T15:00:00Z",
+  "workflowStepUpdatedByUserId": "reviewer@example.com",
+  "_canUpdate": true
+}
+```
+
+## DELETE - Delete project
+
+### Notes
+
+- Requires the same project-level write permission as an update.
+- This is a cascading operation. It terminates a running orchestration and removes the project's statements, descriptors, assignments, memberships, merge records, and merge-decision records before deleting the project.
+
+### Request
+
+| Path parameter | Type | Required | Description |
+|---|---|---|---|
+| `projectId` | string | Yes | Project ID. |
+
+Query parameters: none.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  -X DELETE \
+  "https://matchmakeredlabs.net/api/paletgen/projects/project-123"
+```
+
+### Sample response
+
+```json
+{ "id": "project-123" }
+```
